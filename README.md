@@ -108,83 +108,46 @@ notebooks/              narrative and figures
 
 # The supernova zero point
 
-Supernova magnitudes constrain the *shape* of the distance–redshift
-relation. The theoretical distance modulus is
+Supernova magnitudes constrain the *shape* of the distance–redshift relation. The theoretical distance modulus is
 
 $$
-\mu_{\rm th}(z)
-=
-5\log_{10}\left(\frac{D_L(z)}{\rm Mpc}\right) + 25,
+\mu_{\rm th}(z) = 5\log_{10}\left(\frac{D_L(z)}{\rm Mpc}\right) + 25,
 \qquad
-D_L(z)
-=
-\frac{c}{H_0}(1+z)\,S_K\left[
-\int_0^z \frac{dz'}{E(z')}
-\right].
+D_L(z) = \frac{c}{H_0}(1+z)\,S_K\left[\int_0^z \frac{dz'}{E(z')}\right].
 $$
 
-All of the $H_0$ dependence sits in the prefactor $c/H_0$, and all of
-the cosmological *shape* information sits in the dimensionless quantity
+All of the $H_0$ dependence sits in the prefactor $c/H_0$, and all of the cosmological *shape* information sits in the dimensionless quantity
 
 $$
-d_L(z;\Omega_m,\Omega_\Lambda)
-\equiv
-(1+z)\,S_K\left[
-\int_0^z \frac{dz'}{E(z')}
-\right].
+d_L(z;\Omega_m,\Omega_\Lambda) \equiv (1+z)\,S_K\left[\int_0^z \frac{dz'}{E(z')}\right].
 $$
 
 Because the logarithm turns the product into a sum,
 
 $$
-\mu_{\rm th}(z)
-=
-5\log_{10} d_L(z;\Omega_m,\Omega_\Lambda)
-+
-\mathcal{M},
+\mu_{\rm th}(z) = 5\log_{10} d_L(z;\Omega_m,\Omega_\Lambda) + \mathcal{M},
 $$
 
 with
 
 $$
-\mathcal{M}
-\equiv
-25
-+
-5\log_{10}\left(\frac{c}{H_0\,{\rm Mpc}}\right)
-+
-M_B.
+\mathcal{M} \equiv 25 + 5\log_{10}\left(\frac{c}{H_0\,{\rm Mpc}}\right) + M_B.
 $$
 
-On the data side, converting an observed peak magnitude into a distance
-modulus requires the absolute magnitude of a fiducial SN Ia,
-$M_B \approx -19.3$, which is not predicted by theory and must be
-calibrated externally. The released Union2.1 $\mu$ column already has
-*some* fiducial $M_B$ subtracted, but that choice is arbitrary and imports
-an $H_0$ assumption that we do not want. This analysis therefore treats
-$\mathcal{M}$ as a nuisance parameter and marginalizes it analytically,
-leaving $(\Omega_m,\Omega_\Lambda)$ as the sampled parameter space.
+On the data side, converting an observed peak magnitude into a distance modulus requires the absolute magnitude of a fiducial SN Ia, $M_B \approx -19.3$, which is not predicted by theory and must be calibrated externally. The released Union2.1 $\mu$ column already has *some* fiducial $M_B$ subtracted, but that choice is arbitrary and imports an $H_0$ assumption that we do not want. This analysis therefore treats $\mathcal{M}$ as a nuisance parameter and marginalizes it analytically, leaving $(\Omega_m,\Omega_\Lambda)$ as the sampled parameter space.
 
 ### How it is marginalized
 
 Define the offset-free residual
 
 $$
-\Delta_i
-=
-\mu_i^{\rm obs}
--
-5\log_{10} d_L(z_i;\Omega_m,\Omega_\Lambda),
+\Delta_i = \mu_i^{\rm obs} - 5\log_{10} d_L(z_i;\Omega_m,\Omega_\Lambda),
 $$
 
-so the full residual is $\Delta - \mathcal{M}\mathbf{1}$ with
-$\mathbf{1} = (1,\dots,1)^T$. Expanding the chi-square gives a quadratic
-in $\mathcal{M}$:
+so the full residual is $\Delta - \mathcal{M}\mathbf{1}$ with $\mathbf{1} = (1,\dots,1)^T$. Expanding the chi-square gives a quadratic in $\mathcal{M}$:
 
 $$
-\chi^2(\mathcal{M})
-=
-A - 2\mathcal{M}B + \mathcal{M}^2 E,
+\chi^2(\mathcal{M}) = A - 2\mathcal{M}B + \mathcal{M}^2 E,
 $$
 
 $$
@@ -195,42 +158,24 @@ B = \mathbf{1}^T \mathsf{C}^{-1}\Delta,
 E = \mathbf{1}^T \mathsf{C}^{-1}\mathbf{1}.
 $$
 
-Integrating $\mathcal{M}$ out under a flat prior on $(-\infty,\infty)$ is
-a Gaussian integral. Completing the square,
+Integrating $\mathcal{M}$ out under a flat prior on $(-\infty,\infty)$ is a Gaussian integral. Completing the square,
 
 $$
-\chi^2_{\rm marg}
-=
-A - \frac{B^2}{E} + \ln E.
+\chi^2_{\rm marg} = A - \frac{B^2}{E} + \ln E.
 $$
 
-$E$ depends only on the covariance and the vector of ones, so it is
-**independent of the cosmological parameters**. The $\ln E$ term is
-therefore an additive constant and is dropped:
+$E$ depends only on the covariance and the vector of ones, so it is **independent of the cosmological parameters**. The $\ln E$ term is therefore an additive constant and is dropped:
 
 $$
-\boxed{
-\chi^2 = A - \frac{B^2}{E}
-}
+\boxed{\chi^2 = A - \frac{B^2}{E}}
 $$
 
-The sampled parameter space is therefore two-dimensional,
-$(\Omega_m,\Omega_\Lambda)$.
+The sampled parameter space is therefore two-dimensional, $(\Omega_m,\Omega_\Lambda)$.
 
-Notice that the prior on $\mathcal{M}$ is flat and improper. The resulting
-posterior on $(\Omega_m,\Omega_\Lambda)$ is nevertheless proper,
-because the integrand is Gaussian in $\mathcal{M}$ with positive
-curvature $E > 0$, so the integral converges. What is given up is the
-Bayesian evidence, which inherits the arbitrary normalization of an
-improper prior; model comparison via Bayes factors would require a
-proper prior. Parameter estimation is unaffected.
+Notice that the prior on $\mathcal{M}$ is flat and improper. The resulting posterior on $(\Omega_m,\Omega_\Lambda)$ is nevertheless proper, because the integrand is Gaussian in $\mathcal{M}$ with positive curvature $E > 0$, so the integral converges. What is given up is the Bayesian evidence, which inherits the arbitrary normalization of an improper prior; model comparison via Bayes factors would require a proper prior. Parameter estimation is unaffected.
 
 ### Cost
 
-$E$ and $v \equiv \mathsf{C}^{-1}\mathbf{1}$ are parameter-independent
-and are computed once, outside the likelihood. Each likelihood call then
-needs one triangular solve, $y = \mathsf{L}^{-1}\Delta$, giving
-$A = |y|^2$ and $B = v^T \Delta$. That is exactly the cost of the
-non-marginalized version — the marginalization is free.
+$E$ and $v \equiv \mathsf{C}^{-1}\mathbf{1}$ are parameter-independent and are computed once, outside the likelihood. Each likelihood call then needs one triangular solve, $y = \mathsf{L}^{-1}\Delta$, giving $A = |y|^2$ and $B = v^T \Delta$. That is exactly the cost of the non-marginalized version — the marginalization is free.
 
 References: Amanullah et al. 2010, ApJ 716, 712, Appendix C.
