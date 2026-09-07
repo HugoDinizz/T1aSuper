@@ -1,10 +1,10 @@
 # T1aSuper
 
-Type Ia supernova cosmology: inferring $(\Omega_m, \Omega_\Lambda)$ from the
-Union2.1 compilation with a hand-written Metropolis–Hastings sampler,
-without imposing flatness.
-
 Numerical Cosmology course exercise.
+
+Type Ia supernova cosmology: inferring $(\Omega_m, \Omega_\Lambda)$ from the
+Union2.1 compilation with a Metropolis–Hastings MCMC sampler,
+without imposing flatness.
 
 ## Installation
 
@@ -49,20 +49,9 @@ The script verifies row and column counts and prints SHA-256 checksums,
 which are recorded in its header — compare them to confirm you have the
 same bytes.
 
-Reference: Suzuki et al. 2012, ApJ 746, 85 ([arXiv:1105.3470](https://arxiv.org/abs/1105.3470)).
-
 If the download fails with a Cloudflare 522, the SCP server is
 intermittently unreachable. Retry later, or download by hand from the
 link above into `data/raw/`.
-
-## Running the analysis
-
-```bash
-python scripts/run_union21.py --seed 42
-```
-
-Chains land in `chains/`, figures in `figures/`. Both are gitignored and
-regenerable: the same seed must reproduce the same numbers exactly.
 
 ## Assumptions
 
