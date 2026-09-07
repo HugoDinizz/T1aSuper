@@ -81,12 +81,7 @@ notebooks/              narrative and figures
 # The supernova zero point
 
 Supernova magnitudes constrain the *shape* of the distance–redshift
-relation, never its normalization. This section records where that
-comes from and how it is handled here.
-
-### Where the offset comes from
-
-The theoretical distance modulus is
+relation. The theoretical distance modulus is
 
 $$\mu_{\rm th}(z) = 5\log_{10}\left(\frac{D_L(z)}{\rm Mpc}\right) + 25,
 \qquad
@@ -106,16 +101,9 @@ $$\mu_{\rm th}(z) = 5\log_{10} d_L(z;\Omega_m,\Omega_\Lambda) + \mathcal{M},
 On the data side, converting an observed peak magnitude into a distance
 modulus requires the absolute magnitude of a fiducial SN Ia,
 $M_B \approx -19.3$, which is not predicted by theory and must be
-calibrated externally (Cepheids, TRGB). The released Union2.1 $\mu$
-column already has *some* fiducial $M_B$ subtracted — its header records
-$M_B = -19.308$ for $h = 0.7$ — but that choice is arbitrary and imports
-an $H_0$ assumption we do not want.
-
-So $H_0$ and $M_B$ enter only through the single combination
-$M_B - 5\log_{10}H_0$. They are exactly degenerate: a $0.1$ mag shift in
-$M_B$ is indistinguishable from a $4.7\%$ shift in $H_0$. Introducing
-both as free parameters would give a perfectly flat likelihood ridge and
-a chain that never converges. This analysis therefore fits
+calibrated externally. The released Union2.1 $\mu$
+column already has *some* fiducial $M_B$ subtracted, but that choice is arbitrary and imports
+an $H_0$ assumption we do not want. This analysis therefore fits
 $(\Omega_m, \Omega_\Lambda, \mathcal{M})$ and reports no $H_0$.
 
 ### How it is marginalized
@@ -148,26 +136,13 @@ $$\boxed{\ \chi^2 = A - B^2/E\ }$$
 The sampled parameter space is two-dimensional,
 $(\Omega_m, \Omega_\Lambda)$.
 
-### Assumptions behind this choice
-
-- **The prior on $\mathcal{M}$ is flat and improper.** The resulting
-  posterior on $(\Omega_m,\Omega_\Lambda)$ is nevertheless proper,
-  because the integrand is Gaussian in $\mathcal{M}$ with positive
-  curvature $E > 0$, so the integral converges. What is given up is the
-  Bayesian evidence, which inherits the arbitrary normalization of an
-  improper prior; model comparison via Bayes factors would require a
-  proper prior. Parameter estimation is unaffected.
-- **Physically, the flat prior states that the supernovae carry no
-  information about $M_B$ or $H_0$.** That is the honest position for an
-  uncalibrated Hubble diagram, and it makes the result independent of
-  the SH0ES-versus-Planck disagreement over $M_B$.
-- **Marginalizing and profiling coincide here.** Minimizing
-  $\chi^2(\mathcal{M})$ gives $\widehat{\mathcal{M}} = B/E$ and
-  $\chi^2_{\rm prof} = A - B^2/E$ — the same expression. The two differ
-  only by the $\ln E$ term measuring the width of the $\mathcal{M}$
-  direction, which is constant in this problem. This would *not* hold if
-  the covariance depended on fitted parameters, as with Pantheon-style
-  data where $\alpha$ and $\beta$ are fitted jointly.
+Notice that the prior on $\mathcal{M}$ is flat and improper. The resulting
+posterior on $(\Omega_m,\Omega_\Lambda)$ is nevertheless proper,
+because the integrand is Gaussian in $\mathcal{M}$ with positive
+curvature $E > 0$, so the integral converges. What is given up is the
+Bayesian evidence, which inherits the arbitrary normalization of an
+improper prior; model comparison via Bayes factors would require a
+proper prior. Parameter estimation is unaffected.
 
 ### Cost
 
@@ -177,13 +152,4 @@ needs one triangular solve, $y = \mathsf{L}^{-1}\Delta$, giving
 $A = \|y\|^2$ and $B = v^T \Delta$. That is exactly the cost of the
 non-marginalized version — the marginalization is free.
 
-### Validation
-
-The analytic result is cross-checked against a three-parameter run with
-$\mathcal{M}$ sampled under a wide flat prior. The marginalized
-$(\Omega_m,\Omega_\Lambda)$ contours must agree within Monte Carlo error.
-Disagreement indicates a sign error in $B$ or a swapped residual
-convention.
-
-References: Goliath et al. 2001, A&A 380, 6; Amanullah et al. 2010,
-ApJ 716, 712, Appendix C; Amendola & Tsujikawa, *Dark Energy*, §5.
+References:  Amanullah et al. 2010, ApJ 716, 712, Appendix C.
