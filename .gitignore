@@ -34,3 +34,5 @@ data/*.fits
 
 # Large data — see README for download instructions
 data/raw/
+
+CLAUDE.md
