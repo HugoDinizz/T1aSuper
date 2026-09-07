@@ -92,20 +92,20 @@ comes from and how it is handled here.
 
 The theoretical distance modulus is
 
-$$\mu_{\rm th}(z) = 5\log_{10}\!\left(\frac{D_L(z)}{\rm Mpc}\right) + 25,
+$$\mu_{\rm th}(z) = 5\log_{10}\left(\frac{D_L(z)}{\rm Mpc}\right) + 25,
 \qquad
-D_L(z) = \frac{c}{H_0}(1+z)\,S_k\!\left[\int_0^z \frac{dz'}{E(z')}\right].$$
+D_L(z) = \frac{c}{H_0}(1+z)\,S_k\left[\int_0^z \frac{dz'}{E(z')}\right].$$
 
 All of the $H_0$ dependence sits in the prefactor $c/H_0$, and all of
 the cosmological *shape* information sits in the dimensionless quantity
 
-$$d_L(z;\Omega_m,\Omega_\Lambda) \equiv (1+z)\,S_k\!\left[\int_0^z \frac{dz'}{E(z')}\right].$$
+$$d_L(z;\Omega_m,\Omega_\Lambda) \equiv (1+z)\,S_k\left[\int_0^z \frac{dz'}{E(z')}\right].$$
 
 Because the logarithm turns the product into a sum,
 
 $$\mu_{\rm th}(z) = 5\log_{10} d_L(z;\Omega_m,\Omega_\Lambda) + \mathcal{M},
 \qquad
-\mathcal{M} \equiv 25 + 5\log_{10}\!\left(\frac{c}{H_0\,\rm Mpc}\right) + M_B.$$
+\mathcal{M} \equiv 25 + 5\log_{10}\left(\frac{c}{H_0\,\rm Mpc}\right) + M_B.$$
 
 On the data side, converting an observed peak magnitude into a distance
 modulus requires the absolute magnitude of a fiducial SN Ia,
