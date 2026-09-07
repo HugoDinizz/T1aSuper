@@ -15,6 +15,9 @@ env/
 # macOS
 .DS_Store
 
+# Claude
+CLAUDE.md
+
 # VS Code (keep settings.json out; it holds machine-specific paths)
 .vscode/
 
@@ -34,5 +37,3 @@ data/*.fits
 
 # Large data — see README for download instructions
 data/raw/
-
-CLAUDE.md
