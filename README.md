@@ -69,3 +69,15 @@ link above into `data/raw/`.
 - $\chi^2$ is evaluated by Cholesky solve; $C^{-1}$ is never formed.
 
 ## Layout
+
+```text
+src/snia/
+├── cosmology.py        FLRW: E, chi, D_M, D_A, D_L, mu
+├── bayes/              Posterior, Proposal, MetropolisHastings
+├── diagnostics/        autocorrelation, split R-hat, Dunkley spectrum
+└── data/               Union2.1 loader and likelihood
+
+tests/                  acceptance tests
+scripts/                reproducible pipeline
+notebooks/              narrative and figures
+```
