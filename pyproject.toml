@@ -23,13 +23,6 @@ dev = [
     "jupyter",
 ]
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=8.0",
-    "pytest-cov",
-    "jupyter",
-]
-
 [tool.setuptools.packages.find]
 where = ["src"]
 
