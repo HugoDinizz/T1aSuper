@@ -45,10 +45,6 @@ This fetches three files into `data/raw/` (gitignored) from the
 | `SCPUnion2.1_covmat_sys.txt` | $580\times580$ covariance **including systematics** |
 | `SCPUnion2.1_covmat_nosys.txt` | $580\times580$ covariance, statistical only |
 
-The script verifies row and column counts and prints SHA-256 checksums,
-which are recorded in its header — compare them to confirm you have the
-same bytes.
-
 If the download fails with a Cloudflare 522, the SCP server is
 intermittently unreachable. Retry later, or download by hand from the
 link above into `data/raw/`.
