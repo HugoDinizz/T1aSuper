@@ -113,13 +113,13 @@ Supernova magnitudes constrain the *shape* of the distance–redshift relation. 
 $$
 \mu_{\rm th}(z) = 5\log_{10}\left(\frac{D_L(z)}{\rm Mpc}\right) + 25,
 \qquad
-D_L(z) = \frac{c}{H_0}(1+z)\,S_K\left[\int_0^z \frac{dz'}{E(z')}\right].
+D_L(z) = \frac{c}{H_0}(1+z)S_K\left[\int_0^z \frac{dz'}{E(z')}\right].
 $$
 
 All of the $H_0$ dependence sits in the prefactor $c/H_0$, and all of the cosmological *shape* information sits in the dimensionless quantity
 
 $$
-d_L(z;\Omega_m,\Omega_\Lambda) \equiv (1+z)\,S_K\left[\int_0^z \frac{dz'}{E(z')}\right].
+d_L(z;\Omega_m,\Omega_\Lambda) \equiv (1+z)S_K\left[\int_0^z \frac{dz'}{E(z')}\right].
 $$
 
 Because the logarithm turns the product into a sum,
