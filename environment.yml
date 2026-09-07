@@ -9,4 +9,6 @@ dependencies:
   - matplotlib
   - pytest
   - python=3.12
+  - corner
+  - pytest-cov
 prefix: /opt/homebrew/Caskroom/miniconda/base/envs/t1asuper
