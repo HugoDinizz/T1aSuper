@@ -1,0 +1,12 @@
+name: t1asuper
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - scipy
+  - jupyter
+  - numpy
+  - matplotlib
+  - pytest
+  - python=3.12
+prefix: /opt/homebrew/Caskroom/miniconda/base/envs/t1asuper
