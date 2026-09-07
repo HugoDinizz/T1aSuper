@@ -21,10 +21,16 @@ env/
 # Outputs — regenerable, keep out of history
 results/
 chains/
-figures/*.png
-figures/*.pdf
+figures/*
+!figures/.gitkeep
 *.npz
 *.h5
+
+# Large data — see README for download instructions
+data/raw/
+data/*.txt
+data/*.fits
+!data/.gitkeep
 
 # Large data — see README for download instructions
 data/raw/
