@@ -291,14 +291,12 @@ def figure_hubble(samples, likelihood, redshift, mu, sigma):
 
 
 def _credible_levels(histogram, probabilities=(0.683, 0.954)):
-    """Density levels enclosing the given posterior mass, lowest first."""
     ordered = np.sort(histogram.ravel())[::-1]
     enclosed = np.cumsum(ordered) / ordered.sum()
     return [ordered[np.searchsorted(enclosed, p)] for p in probabilities][::-1]
 
 
 def figure_contours(samples):
-    """One message: the marginal constraints and their degeneracy."""
     flat = samples.reshape(-1, samples.shape[-1])
     figure = corner.corner(
         flat, labels=LABELS, levels=(0.683, 0.954),
@@ -324,11 +322,6 @@ def figure_contours(samples):
 
 
 def figure_parameter_space(samples, likelihood):
-    """One message: what the data exclude, on a scale where it is visible.
-
-    The corner plot auto-scales to the posterior, which puts Einstein-de Sitter
-    at (1, 0) off the edge. Here the range is fixed so the comparison shows.
-    """
     flat = samples.reshape(-1, samples.shape[-1])
     histogram, x_edges, y_edges = np.histogram2d(
         flat[:, 0], flat[:, 1], bins=80,
@@ -573,8 +566,5 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
-    # Headless only when run as a script. Setting this at import time would
-    # also silence the inline backend, so a notebook importing this module
-    # would get no figures at all.
     matplotlib.use("Agg")
     sys.exit(main())
