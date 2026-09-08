@@ -2,6 +2,7 @@
 #
 # Download the SCP Union2.1 supernova compilation.
 #
+#
 #   Source : Supernova Cosmology Project, https://supernova.lbl.gov/Union/
 #   Paper  : Suzuki et al. 2012, ApJ 746, 85  (arXiv:1105.3470)
 #   Content: 580 SNe Ia passing the release cuts, 0.015 <= z <= 1.414
