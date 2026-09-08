@@ -201,7 +201,15 @@ and must be calibrated externally (Cepheids, TRGB). Fixing it imports an
 $H_0$ assumption we do not want.
 
 Since the corrected apparent magnitude obeys
-$m_B^\star + \alpha x_1 - \beta c + \delta P_{\rm host} = M_B + \mu_{\rm shape} + 25 + 5\log_{10}\frac{c/H_0}{\rm Mpc}$, every constant collapses into one free offset:
+
+$$
+m_B^\star + \alpha x_1 - \beta c + \delta P_{\rm host}
+=
+M_B + \mu_{\rm shape} + 25
++ 5\log_{10}\frac{c/H_0}{\rm Mpc},
+$$
+
+every constant collapses into one free offset:
 
 $$
 \mu_{\rm th}(z)
