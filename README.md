@@ -130,15 +130,28 @@ non-zero if the convergence diagnostics fail, so it can be used as a check and
 not only as a report. `results/` is tracked but empty: run the script to
 produce your own.
 
+## The supernova zero point
+
+Supernova magnitudes constrain the *shape* of the distance–redshift
+relation. The distance modulus of a source at luminosity distance $D_L$ is
+pure geometry, with no absolute magnitude in it:
+
+$$
+5\log_{10}\left(\frac{D_L(z)}{\rm Mpc}\right) + 25, \qquad D_L(z) = \frac{c}{H_0}(1+z)S_K\left[\int_0^z \frac{dz'}{E(z')}\right].
+$$
+
+All of the $H_0$ dependence sits in the prefactor $c/H_0$, and all of the
+cosmological information sits in the dimensionless quantity
+
+$$
+d_L(z;\Omega_m,\Omega_\Lambda) \equiv (1+z)S_K\left[\int_0^z \frac{dz'}{E(z')}\right].
+$$
+
 Because the logarithm turns the product into a sum, the two separate
 cleanly:
 
 $$
-5\log_{10}\left(\frac{D_L}{\rm Mpc}\right) + 25
-=
-\underbrace{5\log_{10} d_L(z;\Omega_m,\Omega_\Lambda)}_{\text{shape}}
--
-\underbrace{5\log_{10}\frac{c/H_0}{\rm Mpc} + 25}_{\text{constant in }z}.
+5\log_{10}\left(\frac{D_L}{\rm Mpc}\right) + 25 = \underbrace{5\log_{10} d_L(z;\Omega_m,\Omega_\Lambda)}_{\text{shape}} - \underbrace{5\log_{10}\frac{c/H_0}{\rm Mpc} + 25}_{\text{constant in }z}.
 $$
 
 Only the first term depends on the parameters we are fitting. Call it the
@@ -148,10 +161,7 @@ $M_B$ enters from the data side. The tabulated Union2.1 $\mu^{\rm obs}$
 was built with the Tripp estimator,
 
 $$
-\mu^{\rm obs}
-=
-m_B^\star - M_B^{\rm fid} + \alpha x_1 - \beta c
-- \delta P_{\rm host},
+\mu^{\rm obs} = m_B^\star - M_B^{\rm fid} + \alpha x_1 - \beta c - \delta P_{\rm host},
 $$
 
 using a fiducial $M_B^{\rm fid} = -19.308$ at $h = 0.7$ recorded in the
@@ -162,22 +172,13 @@ $H_0$ assumption we do not want.
 Since the corrected apparent magnitude obeys
 
 $$
-m_B^\star + \alpha x_1 - \beta c + \delta P_{\rm host}
-=
-M_B + \mu_{\rm shape} + 25
-- 5\log_{10}\frac{c/H_0}{\rm Mpc},
+m_B^\star + \alpha x_1 - \beta c + \delta P_{\rm host} = M_B + \mu_{\rm shape} + 25 - 5\log_{10}\frac{c/H_0}{\rm Mpc},
 $$
 
 every constant collapses into one free offset:
 
 $$
-\mu_{\rm th}(z)
-=
-\mu_{\rm shape}(z;\Omega_m,\Omega_\Lambda) + \mathcal{M},
-\qquad
-\mathcal{M}
-\equiv
-M_B + 25 + 5\log_{10}\frac{c/H_0}{\rm Mpc},
+\mu_{\rm th}(z) = \mu_{\rm shape}(z;\Omega_m,\Omega_\Lambda) + \mathcal{M}, \qquad \mathcal{M} \equiv M_B + 25 + 5\log_{10}\frac{c/H_0}{\rm Mpc},
 $$
 
 which absorbs both the unknown absolute magnitude and the Hubble
@@ -207,11 +208,7 @@ $\mathcal{M} = -19.31 + 43.16 = 23.86$ from the same formula.
 Define the offset-free residual
 
 $$
-\Delta_i
-=
-\mu_i^{\rm obs}
--
-5\log_{10} d_L(z_i;\Omega_m,\Omega_\Lambda),
+\Delta_i = \mu_i^{\rm obs} - 5\log_{10} d_L(z_i;\Omega_m,\Omega_\Lambda),
 $$
 
 so the full residual is $\Delta - \mathcal{M}\mathbf{1}$ with
@@ -219,25 +216,17 @@ $\mathbf{1} = (1,\dots,1)^T$. Expanding the chi-square gives a quadratic in
 $\mathcal{M}$:
 
 $$
-\chi^2(\mathcal{M})
-=
-A - 2\mathcal{M}B + \mathcal{M}^2 E,
+\chi^2(\mathcal{M}) = A - 2\mathcal{M}B + \mathcal{M}^2 E,
 $$
 
 $$
-A = \Delta^T \mathsf{C}^{-1}\Delta,
-\qquad
-B = \mathbf{1}^T \mathsf{C}^{-1}\Delta,
-\qquad
-E = \mathbf{1}^T \mathsf{C}^{-1}\mathbf{1}.
+A = \Delta^T \mathsf{C}^{-1}\Delta, \qquad B = \mathbf{1}^T \mathsf{C}^{-1}\Delta, \qquad E = \mathbf{1}^T \mathsf{C}^{-1}\mathbf{1}.
 $$
 
 Integrating $\mathcal{M}$ out under a flat prior on $(-\infty,\infty)$ is a Gaussian integral. Completing the square,
 
 $$
-\chi^2_{\rm marg}
-=
-A - \frac{B^2}{E} + \ln E.
+\chi^2_{\rm marg} = A - \frac{B^2}{E} + \ln E.
 $$
 
 $E$ depends only on the covariance and the vector of ones, so it is
