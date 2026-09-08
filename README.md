@@ -192,7 +192,7 @@ modulus.** Adding it to $5\log_{10}(D_L/{\rm Mpc}) + 25$ would count the
 $+25$ and the $c/H_0$ twice — a 43 mag error. This is the convention of the
 lecture slides, $\mu_{\rm th} = \mu_{\rm shape} + \mathcal{M}$, and it
 is what `distance_modulus(z, m_offset)` implements: it returns
-$5\log_{10} d_L + \texttt{m_offset}$, with no $+25$ and no $c/H_0$ inside.
+$5\log_{10} d_L + \texttt{m\_offset}$, with no $+25$ and no $c/H_0$ inside.
 
 **What $M_B$ means numerically.** Because the released $\mu^{\rm obs}$
 already had $M_B^{\rm fid}$ removed, the $M_B$ appearing in $\mathcal{M}$
