@@ -13,7 +13,6 @@ T1aSuper requires Python 3.11 or newer. Conda is not required.
 ### Recommended: Python virtual environment
 
 Clone the repository and create a local virtual environment:
-
 ```bash
 git clone https://github.com/HugoDinizz/T1aSuper.git
 cd T1aSuper
@@ -28,7 +27,6 @@ python -m pip install -e .
 Using `python -m pip` ensures that `pip` is invoked through the Python interpreter of the active virtual environment. This avoids ambiguity when multiple Python installations are present on the system, such as system Python, Conda, or Homebrew Python.
 
 On Windows, activate the environment with:
-
 ```powershell
 .venv\Scripts\activate
 ```
@@ -36,7 +34,6 @@ On Windows, activate the environment with:
 The `pip install -e .` step installs the package and its runtime dependencies and links `src/snia/` to the Python interpreter of the virtual environment.
 
 Verify the installation with:
-
 ```bash
 python -c "import snia; print(snia.__file__)"
 python -m pytest
@@ -47,7 +44,6 @@ The import should resolve to a path under `src/snia/`.
 ### Conda (optional)
 
 A Conda environment is also provided for users who prefer Conda:
-
 ```bash
 conda env create -f environment.yml
 conda activate t1asuper
@@ -59,7 +55,6 @@ The `environment.yml` reproduces the Conda environment used for the project, whi
 ## Data
 
 The Union2.1 compilation is not tracked in this repository. Download it with:
-
 ```bash
 bash data/download_union21.sh
 ```
@@ -67,11 +62,11 @@ bash data/download_union21.sh
 This fetches three files into `data/raw/` (gitignored) from the
 [Supernova Cosmology Project](https://supernova.lbl.gov/Union/):
 
-| File | Content |
-| --- | --- |
-| `SCPUnion2.1_mu_vs_z.txt` | 580 SNe: name, $z_{\rm CMB}$, $\mu^{\rm obs}$, $\sigma_\mu$, $P(\text{low-mass host})$ |
-| `SCPUnion2.1_covmat_sys.txt` | $580\times580$ covariance **including systematics** |
-| `SCPUnion2.1_covmat_nosys.txt` | $580\times580$ covariance, statistical only |
+| File                           | Content                                                                                  |
+| ------------------------------ | ---------------------------------------------------------------------------------------- |
+| `SCPUnion2.1_mu_vs_z.txt`      | 580 SNe: name, $z_{\rm CMB}$, $\mu^{\rm obs}$, $\sigma_\mu$, $P(\text{low-mass host})$ |
+| `SCPUnion2.1_covmat_sys.txt`   | $580\times580$ covariance **including systematics**                                      |
+| `SCPUnion2.1_covmat_nosys.txt` | $580\times580$ covariance, statistical only                                              |
 
 If the download fails with a Cloudflare 522, the SCP server is
 intermittently unreachable. Retry later, or download by hand from the
@@ -88,9 +83,7 @@ link above into `data/raw/`.
 - $\Omega_r = 0$. Negligible at $z \lesssim 1.5$.
 - Curvature is **not** fixed: $\Omega_k = 1 - \Omega_m - \Omega_\Lambda$ is
   derived, not sampled, and the $S_K$ branches are implemented in full.
-- $H_0$ is **not** a free parameter. It is perfectly degenerate with the
-  SN absolute magnitude $M_B$; both enter only through the additive
-  offset $\mathcal{M} = M_B + 25 + 5\log_{10}\frac{c/H_0}{\rm Mpc}$.
+- $H_0$ is **not** a free parameter. It is perfectly degenerate with the SN absolute magnitude $M_B$; both enter only through the additive offset $\mathcal{M} = M_B + 25 + 5\log_{10}\frac{c/H_0}{\rm Mpc}$.
 - The released $\mu$ values are already standardized with an arbitrary
   fiducial $M_B$, so $\mathcal{M}$ must stay free.
 - The covariance diagonal already contains $\sigma_\mu^2$; it is never
@@ -99,7 +92,6 @@ link above into `data/raw/`.
 - $\chi^2$ is evaluated by Cholesky solve; $C^{-1}$ is never formed.
 
 ## Layout
-
 ```text
 src/snia/
 ├── cosmology.py        FLRW: E, chi, D_M, D_A, D_L, mu
@@ -119,24 +111,23 @@ results/                script output (tracked but empty; run it yourself)
 stored **already executed**, with outputs and figures, so they can be read
 without running anything.
 
-| | notebook | what it gives you |
-| --- | --- | --- |
-| 1 | [`01_distance_modulus_theory`](notebooks/01_distance_modulus_theory.ipynb) | The theory. FLRW metric → comoving distance → $D_A$, $D_L$ → $\mu(z)$, the three curvature branches as one series, Etherington duality, and why $H_0$ cannot be fitted. |
-| 2 | [`02_cosmology_tour`](notebooks/02_cosmology_tour.ipynb) | Every method of `FLRW`, and which parameter values `is_valid` rejects. |
-| 3 | [`03_union21_likelihood`](notebooks/03_union21_likelihood.ipynb) | The data, the covariance, and the analytic marginalization over $\mathcal{M}$. |
-| 4 | [`04_bayes_sampler`](notebooks/04_bayes_sampler.ipynb) | Metropolis–Hastings: proposal scale and geometry, why a rejection is still a sample, what the Hastings ratio does. |
-| 5 | [`05_diagnostics`](notebooks/05_diagnostics.ipynb) | Convergence: autocorrelation and effective sample size, split-$\hat{R}$, the Dunkley power spectrum — each checked against a process with analytic answers. |
-| 6 | [`06_inference`](notebooks/06_inference.ipynb) | **The whole analysis end to end**, including how the chain length is chosen. |
+|   | notebook                                                                    | what it gives you                                                                                                                                                          |
+| - | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 | [01_distance_modulus_theory](notebooks/01_distance_modulus_theory.ipynb) | The theory. FLRW metric → comoving distance → $D_A$, $D_L$ → $\mu(z)$, the three curvature branches as one series, Etherington duality, and why $H_0$ cannot be fitted. |
+| 2 | [02_cosmology_tour](notebooks/02_cosmology_tour.ipynb)                    | Every method of `FLRW`, and which parameter values `is_valid` rejects.                                                                                                     |
+| 3 | [03_union21_likelihood](notebooks/03_union21_likelihood.ipynb)            | The data, the covariance, and the analytic marginalization over $\mathcal{M}$.                                                                                             |
+| 4 | [04_bayes_sampler](notebooks/04_bayes_sampler.ipynb)                      | Metropolis–Hastings: proposal scale and geometry, why a rejection is still a sample, what the Hastings ratio does.                                                         |
+| 5 | [05_diagnostics](notebooks/05_diagnostics.ipynb)                           | Convergence: autocorrelation and effective sample size, split-$\hat{R}$, the Dunkley power spectrum — each checked against a process with analytic answers.                |
+| 6 | [06_inference](notebooks/06_inference.ipynb)                               | **The whole analysis end to end**, including how the chain length is chosen.                                                                                               |
 
 Short on time:
 
-* **just the result** → notebook 6
-* **the physics** → notebook 1
-* **how to reuse the library** → notebooks 2 and 4
-* **whether to trust a chain** → notebook 5
+- **just the result** → notebook 6
+- **the physics** → notebook 1
+- **how to reuse the library** → notebooks 2 and 4
+- **whether to trust a chain** → notebook 5
 
 Run them with the package importable:
-
 ```bash
 conda activate t1asuper       # or: source .venv/bin/activate
 jupyter lab notebooks/
@@ -146,7 +137,6 @@ In VS Code, pick the project interpreter in the kernel selector — the generic
 "Python 3" kernel follows whatever `python` is first on `PATH`.
 
 ## The same analysis without a notebook
-
 ```bash
 python scripts/run_union21.py --cross-check
 ```
@@ -176,7 +166,9 @@ All of the $H_0$ dependence sits in the prefactor $c/H_0$, and all of the
 cosmological information sits in the dimensionless quantity
 
 $$
-d_L(z;\Omega_m,\Omega_\Lambda) \equiv (1+z)S_K\left[\int_0^z \frac{dz'}{E(z')}\right].
+d_L(z;\Omega_m,\Omega_\Lambda)
+\equiv
+(1+z)S_K\left[\int_0^z \frac{dz'}{E(z')}\right].
 $$
 
 Because the logarithm turns the product into a sum, the two separate
@@ -184,8 +176,10 @@ cleanly:
 
 $$
 5\log_{10}\left(\frac{D_L}{\rm Mpc}\right) + 25
-= \underbrace{5\log_{10} d_L(z;\Omega_m,\Omega_\Lambda)}_{\text{shape}}
-+ \underbrace{5\log_{10}\frac{c/H_0}{\rm Mpc} + 25}_{\text{constant in }z} .
+=
+\underbrace{5\log_{10} d_L(z;\Omega_m,\Omega_\Lambda)}_{\text{shape}}
+-
+\underbrace{5\log_{10}\frac{c/H_0}{\rm Mpc} + 25}_{\text{constant in }z}.
 $$
 
 Only the first term depends on the parameters we are fitting. Call it the
@@ -195,8 +189,10 @@ $M_B$ enters from the data side. The tabulated Union2.1 $\mu^{\rm obs}$
 was built with the Tripp estimator,
 
 $$
-\mu^{\rm obs} = m_B^\star - M_B^{\rm fid} + \alpha x_1 - \beta c
-+ \delta P_{\rm host},
+\mu^{\rm obs}
+=
+m_B^\star - M_B^{\rm fid} + \alpha x_1 - \beta c
+- \delta P_{\rm host},
 $$
 
 using a fiducial $M_B^{\rm fid} = -19.308$ at $h = 0.7$ recorded in the
@@ -204,14 +200,17 @@ file header. That choice is arbitrary: $M_B$ is not predicted by theory
 and must be calibrated externally (Cepheids, TRGB). Fixing it imports an
 $H_0$ assumption we do not want.
 
-Since the corrected apparent magnitude obeys $m_B^\star + \alpha x_1 -
-\beta c + \delta P_{\rm host} = M_B + \mu_{\rm shape} + 25 + 5\log_{10}
-\frac{c/H_0}{\rm Mpc}$, every constant collapses into one free offset:
+Since the corrected apparent magnitude obeys
+$m_B^\star + \alpha x_1 - \beta c + \delta P_{\rm host} = M_B + \mu_{\rm shape} + 25 + 5\log_{10}\frac{c/H_0}{\rm Mpc}$, every constant collapses into one free offset:
 
 $$
-\mu_{\rm th}(z) = \mu_{\rm shape}(z;\Omega_m,\Omega_\Lambda) + \mathcal{M},
+\mu_{\rm th}(z)
+=
+\mu_{\rm shape}(z;\Omega_m,\Omega_\Lambda) + \mathcal{M},
 \qquad
-\mathcal{M} \equiv M_B + 25 + 5\log_{10}\frac{c/H_0}{\rm Mpc},
+\mathcal{M}
+\equiv
+M_B + 25 + 5\log_{10}\frac{c/H_0}{\rm Mpc},
 $$
 
 which absorbs both the unknown absolute magnitude and the Hubble
@@ -222,15 +221,15 @@ $(\Omega_m,\Omega_\Lambda)$ as the sampled parameter space.
 
 **$\mathcal{M}$ is added to the shape, never to a complete distance
 modulus.** Adding it to $5\log_{10}(D_L/{\rm Mpc}) + 25$ would count the
-$+25$ and the $c/H_0$ twice — a 43 mag error. This is the convention of
-the lecture slides, $\mu_{\rm th} = \mu_{\rm shape} + \mathcal{M}$, and it
+$+25$ and the $c/H_0$ twice — a 43 mag error. This is the convention of the
+lecture slides, $\mu_{\rm th} = \mu_{\rm shape} + \mathcal{M}$, and it
 is what `distance_modulus(z, m_offset)` implements: it returns
-$5\log_{10} d_L + \texttt{m\_offset}$, with no $+25$ and no $c/H_0$ inside.
+$5\log_{10} d_L + \texttt{m_offset}$, with no $+25$ and no $c/H_0$ inside.
 
 **What $M_B$ means numerically.** Because the released $\mu^{\rm obs}$
 already had $M_B^{\rm fid}$ removed, the $M_B$ appearing in $\mathcal{M}$
 is the offset *relative to that fiducial*. For $h = 0.7$ this makes
-$\mathcal{M} \simeq 25 + 5\log_{10}(c/H_0\,{\rm Mpc}^{-1}) = 43.16$, and
+$\mathcal{M} \simeq 25 + 5\log_{10}(c/H_0,{\rm Mpc}^{-1}) = 43.16$, and
 the fit returns $\hat{\mathcal{M}} = 43.17$; the leftover $0.01$ mag is
 $M_B - M_B^{\rm fid}$, confirming the release was calibrated at $h = 0.7$.
 Fitting apparent magnitudes with no fiducial removed would instead give
@@ -241,13 +240,21 @@ $\mathcal{M} = -19.31 + 43.16 = 23.86$ from the same formula.
 Define the offset-free residual
 
 $$
-\Delta_i = \mu_i^{\rm obs} - 5\log_{10} d_L(z_i;\Omega_m,\Omega_\Lambda),
+\Delta_i
+=
+\mu_i^{\rm obs}
+-
+5\log_{10} d_L(z_i;\Omega_m,\Omega_\Lambda),
 $$
 
-so the full residual is $\Delta - \mathcal{M}\mathbf{1}$ with $\mathbf{1} = (1,\dots,1)^T$. Expanding the chi-square gives a quadratic in $\mathcal{M}$:
+so the full residual is $\Delta - \mathcal{M}\mathbf{1}$ with
+$\mathbf{1} = (1,\dots,1)^T$. Expanding the chi-square gives a quadratic in
+$\mathcal{M}$:
 
 $$
-\chi^2(\mathcal{M}) = A - 2\mathcal{M}B + \mathcal{M}^2 E,
+\chi^2(\mathcal{M})
+=
+A - 2\mathcal{M}B + \mathcal{M}^2 E,
 $$
 
 $$
@@ -261,10 +268,13 @@ $$
 Integrating $\mathcal{M}$ out under a flat prior on $(-\infty,\infty)$ is a Gaussian integral. Completing the square,
 
 $$
-\chi^2_{\rm marg} = A - \frac{B^2}{E} + \ln E.
+\chi^2_{\rm marg}
+=
+A - \frac{B^2}{E} + \ln E.
 $$
 
-$E$ depends only on the covariance and the vector of ones, so it is **independent of the cosmological parameters**. The $\ln E$ term is therefore an additive constant and is dropped:
+$E$ depends only on the covariance and the vector of ones, so it is
+**independent of the cosmological parameters**. The $\ln E$ term is therefore an additive constant and is dropped:
 
 $$
 \boxed{\chi^2 = A - \frac{B^2}{E}}
@@ -276,6 +286,6 @@ Notice that the prior on $\mathcal{M}$ is flat and improper. The resulting poste
 
 ### Cost
 
-$E$ and $v \equiv \mathsf{C}^{-1}\mathbf{1}$ are parameter-independent and are computed once, outside the likelihood. Each likelihood call then needs one triangular solve, $y = \mathsf{L}^{-1}\Delta$, giving $A = \|y\|^2$ and $B = v^T \Delta$. That is exactly the cost of the non-marginalized version — the marginalization is free.
+$E$ and $v \equiv \mathsf{C}^{-1}\mathbf{1}$ are parameter-independent and are computed once, outside the likelihood. Each likelihood call then needs one triangular solve, $y = \mathsf{L}^{-1}\Delta$, giving $A = |y|^2$ and $B = v^T \Delta$. That is exactly the cost of the non-marginalized version — the marginalization is free.
 
 References: Amanullah et al. 2010, ApJ 716, 712, Appendix C.
