@@ -72,12 +72,6 @@ If the download fails with a Cloudflare 522, the SCP server is
 intermittently unreachable. Retry later, or download by hand from the
 link above into `data/raw/`.
 
-> **If you cloned this repository**, note that it does not ship a
-> `.gitignore`. The three files above total about 7 MB and should not go into
-> git history, and neither should `__pycache__/` or `results/`. Add your own
-> ignore file, or put the rules in `.git/info/exclude`, before your first
-> commit.
-
 ## Assumptions
 
 - $\Omega_r = 0$. Negligible at $z \lesssim 1.5$.
@@ -118,23 +112,13 @@ without running anything.
 | 3 | [03_union21_likelihood](notebooks/03_union21_likelihood.ipynb)            | The data, the covariance, and the analytic marginalization over $\mathcal{M}$.                                                                                             |
 | 4 | [04_bayes_sampler](notebooks/04_bayes_sampler.ipynb)                      | Metropolis–Hastings: proposal scale and geometry, why a rejection is still a sample, what the Hastings ratio does.                                                         |
 | 5 | [05_diagnostics](notebooks/05_diagnostics.ipynb)                           | Convergence: autocorrelation and effective sample size, split-$\hat{R}$, the Dunkley power spectrum — each checked against a process with analytic answers.                |
-| 6 | [06_inference](notebooks/06_inference.ipynb)                               | **The whole analysis end to end**, including how the chain length is chosen.                                                                                               |
-
-Short on time:
-
-- **just the result** → notebook 6
-- **the physics** → notebook 1
-- **how to reuse the library** → notebooks 2 and 4
-- **whether to trust a chain** → notebook 5
+| 6 | [06_inference](notebooks/06_inference.ipynb)                               | **Complete analysis*.                                                                                               |
 
 Run them with the package importable:
 ```bash
 conda activate t1asuper       # or: source .venv/bin/activate
 jupyter lab notebooks/
 ```
-
-In VS Code, pick the project interpreter in the kernel selector — the generic
-"Python 3" kernel follows whatever `python` is first on `PATH`.
 
 ## The same analysis without a notebook
 ```bash
@@ -145,10 +129,6 @@ writes `summary.txt`, `chains.npz` and four figures to `results/`, and exits
 non-zero if the convergence diagnostics fail, so it can be used as a check and
 not only as a report. `results/` is tracked but empty: run the script to
 produce your own.
-
-Useful flags: `--steps`, `--chains`, `--seed`, `--no-systematics`,
-`--auto-steps` (choose the chain length from a measured $\tau_{\rm int}$
-rather than by hand), `--target-r`.
 
 ## The supernova zero point
 
