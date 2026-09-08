@@ -99,7 +99,7 @@ notebooks/              narrative and figures
 results/                script output (tracked but empty; run it yourself)
 ```
 
-## Start here: the notebooks
+## The notebooks
 
 `notebooks/` is the intended way in. Each one builds on the last, and all are
 stored **already executed**, with outputs and figures, so they can be read
@@ -129,27 +129,6 @@ writes `summary.txt`, `chains.npz` and four figures to `results/`, and exits
 non-zero if the convergence diagnostics fail, so it can be used as a check and
 not only as a report. `results/` is tracked but empty: run the script to
 produce your own.
-
-## The supernova zero point
-
-Supernova magnitudes constrain the *shape* of the distance–redshift
-relation. The distance modulus of a source at luminosity distance $D_L$ is
-pure geometry, with no absolute magnitude in it:
-
-$$
-5\log_{10}\left(\frac{D_L(z)}{\rm Mpc}\right) + 25,
-\qquad
-D_L(z) = \frac{c}{H_0}(1+z)S_K\left[\int_0^z \frac{dz'}{E(z')}\right].
-$$
-
-All of the $H_0$ dependence sits in the prefactor $c/H_0$, and all of the
-cosmological information sits in the dimensionless quantity
-
-$$
-d_L(z;\Omega_m,\Omega_\Lambda)
-\equiv
-(1+z)S_K\left[\int_0^z \frac{dz'}{E(z')}\right].
-$$
 
 Because the logarithm turns the product into a sum, the two separate
 cleanly:
@@ -186,7 +165,7 @@ $$
 m_B^\star + \alpha x_1 - \beta c + \delta P_{\rm host}
 =
 M_B + \mu_{\rm shape} + 25
-+ 5\log_{10}\frac{c/H_0}{\rm Mpc},
+- 5\log_{10}\frac{c/H_0}{\rm Mpc},
 $$
 
 every constant collapses into one free offset:
