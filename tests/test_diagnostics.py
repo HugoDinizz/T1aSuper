@@ -63,15 +63,50 @@ def test_integrated_time_matches_the_analytic_ar1_value(ar1_long, phi):
     assert tau == pytest.approx(analytic_tau(phi), rel=0.05)
 
 
-def test_integrated_time_is_slightly_biased_low_for_slow_chains(ar1_long):
-    """Sokal's window truncates the sum, which always loses a little tail.
+def test_slow_chain_is_estimated_without_a_systematic_bias(ar1_long):
+    """At phi = 0.95 the true tau is 39, and the estimate straddles it.
 
-    At phi = 0.95 the true tau is 39 and the estimate comes in ~6% low. This
-    is a property of the estimator, not a bug: it is why the window constant
-    is exposed and why a chain should be many tau long.
+    Geyer's initial positive sequence keeps every pair while the pairs are
+    positive, so it does not systematically truncate the tail the way a window
+    rule does. What remains is scatter: across seeds this estimate moves by
+    about +-7% at N = 200000, so the tolerance is set from that and not from a
+    single lucky run.
     """
     tau = integrated_time(ar1_long[0.95])[0]
-    assert 0.88 * analytic_tau(0.95) < tau < analytic_tau(0.95)
+    assert tau == pytest.approx(analytic_tau(0.95), rel=0.15)
+
+
+@pytest.mark.parametrize("phi", [-0.2, -0.5, -0.8, -0.9])
+def test_anti_correlated_chains_give_a_positive_correlation_time(phi):
+    """Regression: a negative tau_int is arithmetically impossible here.
+
+    A window rule that watches the running sum 1 + 2 sum rho_l can stop at the
+    very first lag of an anti-correlated chain, while that total is still
+    negative, and hand back a negative tau_int -- and therefore a NEGATIVE
+    effective sample size and a NaN Monte Carlo error. Summing adjacent lags
+    in pairs cancels the alternation inside each pair instead.
+
+    The Metropolis-Hastings sampler in snia.bayes never produces such chains,
+    so this was latent rather than active, but the numbers it returned were
+    meaningless rather than merely imprecise.
+    """
+    chain = ar1(phi, 50000, np.random.default_rng(0))
+    tau = integrated_time(chain)[0]
+    assert tau > 0.0
+    assert effective_sample_size(chain)[0] > 0.0
+    assert np.isfinite(monte_carlo_error(chain)[0])
+
+
+def test_effective_sample_size_is_capped_at_n_log10_n():
+    """The floor on tau_int caps ESS, which is what keeps an antithetic chain
+    from claiming an unbounded number of independent draws."""
+    alternating = np.array([(-1.0) ** i for i in range(10000)])
+    alternating = alternating + 1e-9 * np.random.default_rng(0).normal(size=10000)
+    tau = integrated_time(alternating)[0]
+    assert tau == pytest.approx(1.0 / np.log10(10000), rel=1e-9)
+    assert effective_sample_size(alternating)[0] == pytest.approx(
+        10000 * np.log10(10000), rel=1e-9
+    )
 
 
 @pytest.mark.parametrize("phi", [0.5, 0.8, 0.9])

@@ -102,14 +102,13 @@ results/                script output (tracked but empty; run it yourself)
 stored **already executed**, with outputs and figures, so they can be read
 without running anything.
 
-|   | Notebook                                                                    | Description you                                                                                                                                                          |
+|   | Notebook                                                                    | Description                                                                                                                                                              |
 | - | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1 | [01_distance_modulus_theory](notebooks/01_distance_modulus_theory.ipynb) | The theory. FLRW metric, distances, the three curvature branches as one series, Etherington duality, and why $H_0$ cannot be fitted. |
 | 2 | [02_cosmology_tour](notebooks/02_cosmology_tour.ipynb)                    | Every method of `FLRW`, and which parameter values `is_valid` rejects.                                                                                                     |
 | 3 | [03_union21_likelihood](notebooks/03_union21_likelihood.ipynb)            | The data, the covariance, and the analytic marginalization over $\mathcal{M}$.                                                                                             |
-| 4 | [04_bayes_sampler](notebooks/04_bayes_sampler.ipynb)                      | Metropolis–Hastings.                                                         |
-| 5 | [05_diagnostics](notebooks/05_diagnostics.ipynb)                           | Convergence tests.                |
-| 6 | [06_inference](notebooks/06_inference.ipynb)                               | Complete analysis.                                                                                               |
+| 4 | [04_bayes_sampler](notebooks/04_bayes_sampler.ipynb)                      | Metropolis–Hastings, and the convergence checks that go with it.                |
+| 5 | [05_inference](notebooks/05_inference.ipynb)                               | Complete analysis.                                                                                               |
 
 Run them with the package importable:
 ```bash
@@ -130,8 +129,7 @@ produce your own.
 ## The supernova zero point
 
 Supernova magnitudes constrain the *shape* of the distance–redshift
-relation. The distance modulus of a source at luminosity distance $D_L$ is
-pure geometry, with no absolute magnitude in it:
+relation. The distance modulus of a source at luminosity distance $D_L$ is defined by:
 
 $$
 \mu = 5\log_{10}\left(\frac{D_L(z)}{\rm Mpc}\right) + 25, \qquad D_L(z) = \frac{c}{H_0}(1+z)S_K\left[\int_0^z \frac{dz'}{E(z')}\right].

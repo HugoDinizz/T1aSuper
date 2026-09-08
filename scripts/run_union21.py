@@ -351,12 +351,8 @@ def figure_contours(samples):
         for side in ("top", "right"):
             axis.spines[side].set_visible(False)
 
-    # the flat line, faint, on the joint panel only
-    joint = np.array(figure.axes).reshape((2, 2))[1, 0]
-    span = np.array(joint.get_xlim())
-    joint.plot(span, 1 - span, "k--", lw=1.2, alpha=0.7, zorder=0)
-    joint.set_xlim(*span)
-
+    # No flat line here: unlabelled it means nothing, and labelling it would
+    # crowd the panel. It carries its legend in figure_parameter_space.
     figure.set_size_inches(6.4, 6.4)
     return figure
 
