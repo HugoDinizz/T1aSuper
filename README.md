@@ -69,13 +69,19 @@ This fetches three files into `data/raw/` (gitignored) from the
 
 | File | Content |
 | --- | --- |
-| `SCPUnion2.1_mu_vs_z.txt` | 580 SNe: name, $z_{\rm CMB}$, $\mu$, $\sigma_\mu$, $P(\text{low-mass host})$ |
+| `SCPUnion2.1_mu_vs_z.txt` | 580 SNe: name, $z_{\rm CMB}$, $\mu^{\rm obs}$, $\sigma_\mu$, $P(\text{low-mass host})$ |
 | `SCPUnion2.1_covmat_sys.txt` | $580\times580$ covariance **including systematics** |
 | `SCPUnion2.1_covmat_nosys.txt` | $580\times580$ covariance, statistical only |
 
 If the download fails with a Cloudflare 522, the SCP server is
 intermittently unreachable. Retry later, or download by hand from the
 link above into `data/raw/`.
+
+> **If you cloned this repository**, note that it does not ship a
+> `.gitignore`. The three files above total about 7 MB and should not go into
+> git history, and neither should `__pycache__/` or `results/`. Add your own
+> ignore file, or put the rules in `.git/info/exclude`, before your first
+> commit.
 
 ## Assumptions
 
@@ -84,7 +90,7 @@ link above into `data/raw/`.
   derived, not sampled, and the $S_K$ branches are implemented in full.
 - $H_0$ is **not** a free parameter. It is perfectly degenerate with the
   SN absolute magnitude $M_B$; both enter only through the additive
-  offset $\mathcal{M} = M_B + 25 + 5\log_{10}(c/H_0,\mathrm{Mpc})$.
+  offset $\mathcal{M} = M_B + 25 + 5\log_{10}\frac{c/H_0}{\rm Mpc}$.
 - The released $\mu$ values are already standardized with an arbitrary
   fiducial $M_B$, so $\mathcal{M}$ must stay free.
 - The covariance diagonal already contains $\sigma_\mu^2$; it is never
@@ -104,37 +110,131 @@ src/snia/
 tests/                  acceptance tests
 scripts/                reproducible pipeline
 notebooks/              narrative and figures
+results/                script output (tracked but empty; run it yourself)
 ```
 
-# The supernova zero point
+## Start here: the notebooks
 
-Supernova magnitudes constrain the *shape* of the distance–redshift relation. The theoretical distance modulus is
+`notebooks/` is the intended way in. Each one builds on the last, and all are
+stored **already executed**, with outputs and figures, so they can be read
+without running anything.
+
+| | notebook | what it gives you |
+| --- | --- | --- |
+| 1 | [`01_distance_modulus_theory`](notebooks/01_distance_modulus_theory.ipynb) | The theory. FLRW metric → comoving distance → $D_A$, $D_L$ → $\mu(z)$, the three curvature branches as one series, Etherington duality, and why $H_0$ cannot be fitted. |
+| 2 | [`02_cosmology_tour`](notebooks/02_cosmology_tour.ipynb) | Every method of `FLRW`, and which parameter values `is_valid` rejects. |
+| 3 | [`03_union21_likelihood`](notebooks/03_union21_likelihood.ipynb) | The data, the covariance, and the analytic marginalization over $\mathcal{M}$. |
+| 4 | [`04_bayes_sampler`](notebooks/04_bayes_sampler.ipynb) | Metropolis–Hastings: proposal scale and geometry, why a rejection is still a sample, what the Hastings ratio does. |
+| 5 | [`05_diagnostics`](notebooks/05_diagnostics.ipynb) | Convergence: autocorrelation and effective sample size, split-$\hat{R}$, the Dunkley power spectrum — each checked against a process with analytic answers. |
+| 6 | [`06_inference`](notebooks/06_inference.ipynb) | **The whole analysis end to end**, including how the chain length is chosen. |
+
+Short on time:
+
+* **just the result** → notebook 6
+* **the physics** → notebook 1
+* **how to reuse the library** → notebooks 2 and 4
+* **whether to trust a chain** → notebook 5
+
+Run them with the package importable:
+
+```bash
+conda activate t1asuper       # or: source .venv/bin/activate
+jupyter lab notebooks/
+```
+
+In VS Code, pick the project interpreter in the kernel selector — the generic
+"Python 3" kernel follows whatever `python` is first on `PATH`.
+
+## The same analysis without a notebook
+
+```bash
+python scripts/run_union21.py --cross-check
+```
+
+writes `summary.txt`, `chains.npz` and four figures to `results/`, and exits
+non-zero if the convergence diagnostics fail, so it can be used as a check and
+not only as a report. `results/` is tracked but empty: run the script to
+produce your own.
+
+Useful flags: `--steps`, `--chains`, `--seed`, `--no-systematics`,
+`--auto-steps` (choose the chain length from a measured $\tau_{\rm int}$
+rather than by hand), `--target-r`.
+
+## The supernova zero point
+
+Supernova magnitudes constrain the *shape* of the distance–redshift
+relation. The distance modulus of a source at luminosity distance $D_L$ is
+pure geometry, with no absolute magnitude in it:
 
 $$
-\mu_{\rm th}(z) = 5\log_{10}\left(\frac{D_L(z)}{\rm Mpc}\right) + 25,
+5\log_{10}\left(\frac{D_L(z)}{\rm Mpc}\right) + 25,
 \qquad
 D_L(z) = \frac{c}{H_0}(1+z)S_K\left[\int_0^z \frac{dz'}{E(z')}\right].
 $$
 
-All of the $H_0$ dependence sits in the prefactor $c/H_0$, and all of the cosmological *shape* information sits in the dimensionless quantity
+All of the $H_0$ dependence sits in the prefactor $c/H_0$, and all of the
+cosmological information sits in the dimensionless quantity
 
 $$
 d_L(z;\Omega_m,\Omega_\Lambda) \equiv (1+z)S_K\left[\int_0^z \frac{dz'}{E(z')}\right].
 $$
 
-Because the logarithm turns the product into a sum,
+Because the logarithm turns the product into a sum, the two separate
+cleanly:
 
 $$
-\mu_{\rm th}(z) = 5\log_{10} d_L(z;\Omega_m,\Omega_\Lambda) + \mathcal{M},
+5\log_{10}\left(\frac{D_L}{\rm Mpc}\right) + 25
+= \underbrace{5\log_{10} d_L(z;\Omega_m,\Omega_\Lambda)}_{\text{shape}}
++ \underbrace{5\log_{10}\frac{c/H_0}{\rm Mpc} + 25}_{\text{constant in }z} .
 $$
 
-with
+Only the first term depends on the parameters we are fitting. Call it the
+**shape**, $\mu_{\rm shape}(z;\Omega_m,\Omega_\Lambda) \equiv 5\log_{10} d_L$.
+
+$M_B$ enters from the data side. The tabulated Union2.1 $\mu^{\rm obs}$
+was built with the Tripp estimator,
 
 $$
-\mathcal{M} \equiv 25 + 5\log_{10}\left(\frac{c}{H_0\,{\rm Mpc}}\right) + M_B.
+\mu^{\rm obs} = m_B^\star - M_B^{\rm fid} + \alpha x_1 - \beta c
++ \delta P_{\rm host},
 $$
 
-On the data side, converting an observed peak magnitude into a distance modulus requires the absolute magnitude of a fiducial SN Ia, $M_B \approx -19.3$, which is not predicted by theory and must be calibrated externally. The released Union2.1 $\mu$ column already has *some* fiducial $M_B$ subtracted, but that choice is arbitrary and imports an $H_0$ assumption that we do not want. This analysis therefore treats $\mathcal{M}$ as a nuisance parameter and marginalizes it analytically, leaving $(\Omega_m,\Omega_\Lambda)$ as the sampled parameter space.
+using a fiducial $M_B^{\rm fid} = -19.308$ at $h = 0.7$ recorded in the
+file header. That choice is arbitrary: $M_B$ is not predicted by theory
+and must be calibrated externally (Cepheids, TRGB). Fixing it imports an
+$H_0$ assumption we do not want.
+
+Since the corrected apparent magnitude obeys $m_B^\star + \alpha x_1 -
+\beta c + \delta P_{\rm host} = M_B + \mu_{\rm shape} + 25 + 5\log_{10}
+\frac{c/H_0}{\rm Mpc}$, every constant collapses into one free offset:
+
+$$
+\mu_{\rm th}(z) = \mu_{\rm shape}(z;\Omega_m,\Omega_\Lambda) + \mathcal{M},
+\qquad
+\mathcal{M} \equiv M_B + 25 + 5\log_{10}\frac{c/H_0}{\rm Mpc},
+$$
+
+which absorbs both the unknown absolute magnitude and the Hubble
+constant, in the one combination the supernovae can never separate. A
+$0.1$ mag shift in $M_B$ is indistinguishable from a $4.7\%$ shift in
+$H_0$. This analysis marginalizes $\mathcal{M}$ analytically, leaving
+$(\Omega_m,\Omega_\Lambda)$ as the sampled parameter space.
+
+**$\mathcal{M}$ is added to the shape, never to a complete distance
+modulus.** Adding it to $5\log_{10}(D_L/{\rm Mpc}) + 25$ would count the
+$+25$ and the $c/H_0$ twice — a 43 mag error. This is the convention of
+the lecture slides, $\mu_{\rm th} = \mu_{\rm shape} + \mathcal{M}$, and it
+is what `distance_modulus(z, m_offset)` implements: it returns
+$5\log_{10} d_L + \texttt{m\_offset}$, with no $+25$ and no $c/H_0$ inside.
+
+**What $M_B$ means numerically.** Because the released $\mu^{\rm obs}$
+already had $M_B^{\rm fid}$ removed, the $M_B$ appearing in $\mathcal{M}$
+is the offset *relative to that fiducial*. For $h = 0.7$ this makes
+$\mathcal{M} \simeq 25 + 5\log_{10}(c/H_0\,{\rm Mpc}^{-1}) = 43.16$, and
+the fit returns $\hat{\mathcal{M}} = 43.17$; the leftover $0.01$ mag is
+$M_B - M_B^{\rm fid}$, confirming the release was calibrated at $h = 0.7$.
+Fitting apparent magnitudes with no fiducial removed would instead give
+$\mathcal{M} = -19.31 + 43.16 = 23.86$ from the same formula.
 
 ### How it is marginalized
 
@@ -176,6 +276,6 @@ Notice that the prior on $\mathcal{M}$ is flat and improper. The resulting poste
 
 ### Cost
 
-$E$ and $v \equiv \mathsf{C}^{-1}\mathbf{1}$ are parameter-independent and are computed once, outside the likelihood. Each likelihood call then needs one triangular solve, $y = \mathsf{L}^{-1}\Delta$, giving $A = |y|^2$ and $B = v^T \Delta$. That is exactly the cost of the non-marginalized version — the marginalization is free.
+$E$ and $v \equiv \mathsf{C}^{-1}\mathbf{1}$ are parameter-independent and are computed once, outside the likelihood. Each likelihood call then needs one triangular solve, $y = \mathsf{L}^{-1}\Delta$, giving $A = \|y\|^2$ and $B = v^T \Delta$. That is exactly the cost of the non-marginalized version — the marginalization is free.
 
 References: Amanullah et al. 2010, ApJ 716, 712, Appendix C.

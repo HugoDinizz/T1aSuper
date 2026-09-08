@@ -379,6 +379,10 @@ METHODS = [
     "angular_diameter_distance",
     "luminosity_distance",
     "distance_modulus",
+    "lookback_time",
+    "age",
+    "comoving_volume_element",
+    "deceleration_parameter",
 ]
 
 
@@ -433,6 +437,10 @@ def test_no_nan_and_no_warnings_anywhere_in_the_prior_box():
                 c.angular_diameter_distance(Z),
                 c.luminosity_distance(Z),
                 c.distance_modulus(Z, 43.0),
+                c.lookback_time(Z),
+                c.age(Z),
+                c.comoving_volume_element(Z),
+                c.deceleration_parameter(Z),
             ]
             c.is_valid(Z.max())
             for out in outputs:
@@ -444,3 +452,126 @@ def test_omega_k_is_derived_not_stored():
     assert c.omega_k == pytest.approx(0.1, abs=4 * EPS)
     c.omega_lambda = 0.7
     assert c.omega_k == pytest.approx(0.0, abs=4 * EPS)
+
+
+# --------------------------------------------------------------------------
+# 9. Times, volume, and the deceleration parameter
+# --------------------------------------------------------------------------
+
+
+def _quad_age(om, ol, z=0.0):
+    """H0 t(z) = int_0^a da'/sqrt(Om/a' + Ok + OL a'^2), integrated adaptively."""
+    ok = 1.0 - om - ol
+    value, _ = quad(
+        lambda a: 1.0 / np.sqrt(om / a + ok + ol * a * a),
+        0.0,
+        1.0 / (1.0 + z),
+        epsabs=1e-13,
+        epsrel=1e-13,
+    )
+    return value
+
+
+def test_einstein_de_sitter_age_is_two_thirds():
+    """The textbook result H0 t0 = 2/3 for a flat matter-only universe."""
+    assert FLRW(1.0, 0.0).age(0.0) == pytest.approx(2.0 / 3.0, rel=1e-6)
+
+
+def test_milne_age_is_one_hubble_time():
+    """Empty and coasting: a = t, so H0 t0 = 1 exactly."""
+    assert FLRW(0.0, 0.0).age(0.0) == pytest.approx(1.0, rel=1e-9)
+
+
+def test_de_sitter_age_diverges():
+    """No Big Bang: the integrand goes as 1/x and the age is infinite."""
+    assert FLRW(0.0, 1.0).age(0.0) == np.inf
+
+
+def test_lcdm_age_is_13_5_gyr():
+    """H0 t0 = 0.9641 for (0.3, 0.7), i.e. 13.47 Gyr at h = 0.7.
+
+    The conversion is 1/H0 = 9.778/h Gyr, and this is the standard
+    cross-check that the whole E(z) normalization is right.
+    """
+    hubble_time_gyr = 9.778 / 0.7
+    assert FLRW(0.3, 0.7).age(0.0) * hubble_time_gyr == pytest.approx(13.47, abs=0.02)
+
+
+@pytest.mark.parametrize("om, ol", [(0.3, 0.7), (1.0, 0.0), (0.5, 0.1), (0.2, 0.8)])
+@pytest.mark.parametrize("z", [0.0, 0.5, 2.0])
+def test_age_matches_adaptive_quadrature(om, ol, z):
+    assert FLRW(om, ol).age(z) == pytest.approx(_quad_age(om, ol, z), rel=5e-7)
+
+
+def test_einstein_de_sitter_age_and_lookback_closed_forms(): 
+    """EdS: H0 t(z) = (2/3)(1+z)^-3/2 and H0 t_L = (2/3)[1 - (1+z)^-3/2]."""
+    c = FLRW(1.0, 0.0)
+    z = np.array([0.5, 1.0, 2.0])
+    assert np.allclose(c.age(z), 2.0 / 3.0 * (1.0 + z) ** -1.5, rtol=5e-7)
+    assert np.allclose(
+        c.lookback_time(z), 2.0 / 3.0 * (1.0 - (1.0 + z) ** -1.5), rtol=5e-7
+    )
+
+
+@pytest.mark.parametrize("om, ol", [(0.3, 0.7), (1.0, 0.0), (0.2, 0.8)])
+def test_lookback_time_equals_age_today_minus_age_then(om, ol):
+    """t_L(z) = t(0) - t(z), and the two sides are computed by completely
+    different integrals: one over z, one over x = sqrt(a). Agreement is a
+    strong check that both substitutions are right."""
+    c = FLRW(om, ol)
+    for z in (0.1, 1.0, 1.414):
+        assert c.lookback_time(z) == pytest.approx(c.age(0.0) - c.age(z), abs=2e-7)
+
+
+def test_lookback_time_vanishes_at_zero_and_increases():
+    c = FLRW(0.3, 0.7)
+    assert c.lookback_time(0.0) == 0.0
+    z = np.linspace(0.0, 1.414, 50)
+    assert np.all(np.diff(c.lookback_time(z)) > 0.0)
+
+
+def test_comoving_volume_element_is_DM_squared_over_E():
+    c = FLRW(0.3, 0.7)
+    expected = c.transverse_comoving_distance(Z) ** 2 / c.E(Z)
+    assert np.allclose(c.comoving_volume_element(Z), expected, rtol=1e-14)
+    assert c.comoving_volume_element(0.0) == 0.0
+
+
+@pytest.mark.parametrize("om, ol", [(0.3, 0.7), (1.0, 0.0), (0.0, 1.0), (0.5, 0.5)])
+def test_q0_property_matches_q_at_zero(om, ol):
+    c = FLRW(om, ol)
+    assert c.q0 == pytest.approx(om / 2.0 - ol, abs=4 * EPS)
+    assert c.deceleration_parameter(0.0) == pytest.approx(c.q0, rel=1e-14)
+
+
+def test_deceleration_changes_sign_at_the_onset_of_acceleration():
+    """q = 0 where Om(1+z)^3/2 = OL, i.e. z = (2 OL/Om)^(1/3) - 1 = 0.671
+    for (0.3, 0.7). This is the deceleration-acceleration transition."""
+    c = FLRW(0.3, 0.7)
+    z_transition = (2.0 * 0.7 / 0.3) ** (1.0 / 3.0) - 1.0
+    assert z_transition == pytest.approx(0.6711, abs=1e-3)
+    assert c.deceleration_parameter(z_transition) == pytest.approx(0.0, abs=1e-12)
+    assert c.deceleration_parameter(z_transition - 0.1) < 0.0
+    assert c.deceleration_parameter(z_transition + 0.1) > 0.0
+
+
+def test_einstein_de_sitter_q_is_one_half_at_every_redshift():
+    """Matter-only: q = 1/2 independent of z."""
+    assert np.allclose(FLRW(1.0, 0.0).deceleration_parameter(Z), 0.5, rtol=1e-14)
+
+
+def test_age_is_shorter_at_higher_redshift():
+    c = FLRW(0.3, 0.7)
+    ages = c.age(np.array([0.0, 0.5, 1.0, 2.0, 5.0]))
+    assert np.all(np.diff(ages) < 0.0)
+
+
+def test_is_valid_accepts_a_degenerate_zero_range():
+    """is_valid(0) must not reject a good model: D_M(0) = 0 is not a failure."""
+    assert FLRW(0.3, 0.7).is_valid(0.0) is True
+
+
+def test_repr_shows_the_derived_quantities():
+    text = repr(FLRW(0.3, 0.7))
+    assert "omega_m=0.3" in text and "omega_lambda=0.7" in text
+    assert "omega_k" in text and "q0" in text
