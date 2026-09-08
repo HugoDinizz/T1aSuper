@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""End-to-end Union2.1 analysis: data in, constraints and diagnostics out.
+"""Union2.1 analysis.
 
     python scripts/run_union21.py                 # default production run
     python scripts/run_union21.py --steps 2000    # quick smoke test
@@ -10,15 +10,7 @@ Everything is driven by one seed, so a rerun reproduces the chains bit for
 bit. The script exits non-zero if the convergence diagnostics fail, so it can
 be used as a check and not only as a report.
 
-Products, all written to results/:
-
-    summary.txt             the full report, exactly as printed
-    chains.npz              retained samples, log posterior, acceptance
-    hubble_diagram.png      the fit against the data, with residuals
-    contours.png            the (Omega_m, Omega_Lambda) marginal posterior
-    parameter_space.png     the same, on a scale that shows what is excluded
-    convergence.png         traces, running means, autocorrelation
-    dunkley_spectrum.png    the chain in Fourier space
+Products are written to results/.
 """
 
 import argparse
@@ -105,12 +97,6 @@ def parse_args(argv=None):
 
 
 def tune_proposal(posterior, n_warmup, rng):
-    """Learn the shape of the posterior, then freeze it.
-
-    A pilot chain with a crude diagonal proposal is enough to estimate the
-    covariance. Adapting during the production run would break the Markov
-    property, so the tuned covariance is fixed from here on.
-    """
     pilot = MetropolisHastings(
         posterior, GaussianRandomWalk(np.diag([0.05**2, 0.08**2]))
     ).sample([0.3, 0.7], n_warmup, rng)
@@ -119,31 +105,12 @@ def tune_proposal(posterior, n_warmup, rng):
 
 
 def calibrate_length(posterior, proposal, start, rng, target_r, probe_steps=6000):
-    """How many steps per chain are needed, measured rather than guessed.
-
-    The Dunkley ratio is r = tau_int/N exactly, and r is also 1/N_eff, so a
-    target r fixes the length directly:
-
-        N = tau_int / r_target.
-
-    r = 0.01 means the standard error of the mean is a tenth of the posterior
-    width. The other Dunkley threshold, j_star > 20, needs only N > 20 pi tau
-    (about 63 tau) for a random walk, so the r condition is the binding one.
-
-    tau_int is measured with the FINAL proposal: the pilot used a deliberately
-    crude one and would give an unrepresentative answer.
-    """
     probe = MetropolisHastings(posterior, proposal).sample(start, probe_steps, rng)
     tau = float(np.max(integrated_time(probe.samples[probe_steps // 4 :])))
     return int(np.ceil(tau / target_r)), tau
 
 
 def dispersed_starts(posterior, centre, covariance, n_chains, rng, spread=3.0):
-    """Valid starting points scattered well beyond the bulk of the posterior.
-
-    Chains that begin far apart and end up agreeing are much stronger evidence
-    than one stable-looking trace, which is the whole point of split-Rhat.
-    """
     factor = np.linalg.cholesky(covariance)
     for _ in range(1000 * n_chains):
         starts = [
@@ -254,7 +221,6 @@ def report_convergence(samples, acceptance, target_r, say):
 
 
 def _style():
-    """One consistent look for every figure."""
     plt.rcParams.update({
         "figure.dpi": 150,
         "axes.grid": True,
