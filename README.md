@@ -213,4 +213,5 @@ $$
 
 Notice that the prior on $\mathcal{M}$ is flat and improper. The resulting posterior on $(\Omega_m,\Omega_\Lambda)$ is nevertheless proper, because the integrand is Gaussian in $\mathcal{M}$ with positive curvature $E > 0$, so the integral converges. What is given up is the Bayesian evidence, while parameter estimation is unaffected. $E$ and $v \equiv \mathsf{C}^{-1}\mathbf{1}$ are parameter-independent and are computed once, outside the likelihood. Each likelihood call then needs one triangular solve, $y = \mathsf{L}^{-1}\Delta$, giving $A = |y|^2$ and $B = v^T \Delta$. That is exactly the cost of the non-marginalized version, such that the marginalization is free.
 
-References: Amanullah et al. 2010, ApJ 716, 712, Appendix C.
+References: Amanullah et al. 2010, ApJ 716, 712, Appendix C; Amendola & Tsujikawa 2010, Dark Energy: Theory and Observations, Chapters 5 & 13.
+
