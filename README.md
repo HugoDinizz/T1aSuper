@@ -180,7 +180,7 @@ $(\Omega_m,\Omega_\Lambda)$ as the sampled parameter space.
 
 ### How it is marginalized
 
-Define the offset-free residual
+Here, I follow the steps of Amendola & Tsujikawa (2010). Define the offset-free residual
 
 $$
 \Delta_i = \mu_i^{\rm obs} - 5\log_{10} d_L(z_i;\Omega_m,\Omega_\Lambda),
