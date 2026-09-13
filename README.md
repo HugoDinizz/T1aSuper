@@ -54,7 +54,7 @@ The `environment.yml` reproduces the Conda environment used for the project, whi
 
 ## Data
 
-The Union2.1 compilation is not tracked in this repository. Download it with:
+For convenience, I have included the necessary Union2.1 data files in the repository. However, you can still download it with:
 ```bash
 bash data/download_union21.sh
 ```
@@ -67,10 +67,6 @@ This fetches three files into `data/raw/` from the
 | `SCPUnion2.1_mu_vs_z.txt`      | 580 SNe: name, $z_{\rm CMB}$, $\mu^{\rm obs}$, $\sigma_\mu$, $P(\text{low-mass host})$ |
 | `SCPUnion2.1_covmat_sys.txt`   | $580\times580$ covariance **including systematics**                                      |
 | `SCPUnion2.1_covmat_nosys.txt` | $580\times580$ covariance, statistical only                                              |
-
-If the download fails with a Cloudflare 522, the SCP server is
-intermittently unreachable. Retry later, or download by hand from the
-link above into `data/raw/`.
 
 ## Assumptions
 
