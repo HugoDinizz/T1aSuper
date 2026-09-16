@@ -54,7 +54,7 @@ The `environment.yml` reproduces the Conda environment used for the project, whi
 
 ## Data
 
-For convenience, I have included the necessary Union2.1 data files in the repository. However, you can still download it with:
+For convenience, I have included the necessary Union2.1 data files in the repository in the correct format for the pipeline. However, you can still download it with:
 ```bash
 bash data/download_union21.sh
 ```
