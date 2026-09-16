@@ -1,9 +1,4 @@
-"""Autocorrelation, integrated time, effective sample size and MCSE.
-
-Chain length is not sample size. A Markov chain of N correlated draws carries
-the information of roughly N/tau_int independent ones, and it is that number
-which sets the Monte Carlo error on any reported quantity.
-"""
+"""Autocorrelation, integrated time, effective sample size and MCSE."""
 
 import numpy as np
 
@@ -11,12 +6,7 @@ from ._chains import as_chains
 
 
 def autocorrelation(samples, max_lag=None):
-    """rho_l = Cov(x_t, x_{t+l}) / Var(x_t), averaged over chains.
-
-    Returns an array of shape (max_lag + 1, n_params), starting at rho_0 = 1.
-    Computed by FFT, which is O(N log N) instead of the O(N^2) of a direct
-    sum -- the difference between seconds and hours on a long chain.
-    """
+    """rho_l = Cov(x_t, x_{t+l}) / Var(x_t), averaged over chains."""
     chains = as_chains(samples)
     n_chains, n_steps, n_params = chains.shape
     if max_lag is None:
@@ -32,34 +22,8 @@ def autocorrelation(samples, max_lag=None):
 
 def integrated_time(samples):
     """tau_int by Geyer's initial positive sequence.
-
-    tau_int = 1 + 2 sum_{l>=1} rho_l is a sum that has to be truncated: at
-    large lag rho_l is estimated from ever fewer pairs and is pure noise.
-    Geyer's rule pairs adjacent lags,
-
         Gamma_m = rho_{2m} + rho_{2m+1},
-
-    and keeps terms only while Gamma_m stays positive. For a reversible Markov
-    chain Gamma_m is provably positive and decreasing, so the first
-    non-positive pair is noise and everything from there on is dropped. Since
-    rho_0 = 1, summing in pairs gives
-
         tau_int = -1 + 2 sum_{m=0}^{M} Gamma_m .
-
-    Pairing is what makes this safe on ANTI-correlated chains, and that is why
-    it replaced a window rule here. A rule that watches the running sum -- as
-    Sokal's does -- can stop at the very first lag while the total is still
-    negative, and return a negative tau_int, hence a negative effective sample
-    size and a NaN Monte Carlo error. Adjacent lags of an alternating chain
-    cancel inside a pair instead.
-
-    The result is floored at 1/log10(N), which caps the effective sample size
-    at N log10(N). This is Stan's safeguard: an estimate above that is not
-    trustworthy, and without it a nearly antithetic chain can still drive
-    tau_int to zero or below. It errs towards reporting too few independent
-    samples, never too many.
-
-    Returns +inf for a chain that never moved.
     """
     chains = as_chains(samples)
     n_chains, n_steps, n_params = chains.shape
@@ -88,11 +52,7 @@ def effective_sample_size(samples):
 
 
 def monte_carlo_error(samples):
-    """MCSE of the posterior mean, s / sqrt(N_eff).
-
-    This is the number to quote a result against: a constraint is only
-    meaningful to the precision with which its own mean is known.
-    """
+    """MCSE of the posterior mean, s / sqrt(N_eff)."""
     chains = as_chains(samples)
     n_chains, n_steps, n_params = chains.shape
     pooled = chains.reshape(n_chains * n_steps, n_params)
@@ -102,11 +62,7 @@ def monte_carlo_error(samples):
 
 
 def _normalized_acf(x):
-    """Normalized autocorrelation of a 1-D array, by FFT.
-
-    The transform is zero-padded to at least 2N so that the circular
-    correlation the FFT computes equals the linear one we want.
-    """
+    """Normalized autocorrelation of a 1-D array, by FFT."""
     centred = x - x.mean()
     size = 1 << (2 * x.size - 1).bit_length()
     spectrum = np.fft.rfft(centred, n=size)

@@ -1,24 +1,10 @@
 #!/usr/bin/env python
-"""Union2.1 analysis.
-
-    python scripts/run_union21.py                 # default production run
-    python scripts/run_union21.py --steps 2000    # quick smoke test
-    python scripts/run_union21.py --auto-steps    # size the run from tau_int
-    python scripts/run_union21.py --cross-check   # validate the marginalization
-
-Everything is driven by one seed, so a rerun reproduces the chains bit for
-bit. The script exits non-zero if the convergence diagnostics fail, so it can
-be used as a check and not only as a report.
-
-Products are written to results/.
-"""
+"""Union2.1 analysis. Products are written to results/. You can also run the notebook 05, which is more organized."""
 
 import argparse
 import sys
 from pathlib import Path
-
 import matplotlib
-
 import corner
 import matplotlib.pyplot as plt
 import numpy as np
@@ -45,18 +31,14 @@ LABELS = [r"$\Omega_m$", r"$\Omega_\Lambda$"]
 PRIOR_LOWER = [0.0, -1.0]
 PRIOR_UPPER = [2.0, 3.0]
 
-#: 2.38/sqrt(d) times the posterior covariance is the classic optimal scaling.
+#Optimal scaling
 OPTIMAL_SCALE = 2.38 / np.sqrt(2)
 
-#: Rhat above this is treated as a failure. A guideline, not a proof.
+#Rhat above this is treated as a failure. 
 MAX_RHAT = 1.01
-
 EINSTEIN_DE_SITTER = (1.0, 0.0)
 
-
 class Tee:
-    """Write the report to stdout and to a file at the same time."""
-
     def __init__(self, path):
         self.handle = open(path, "w")
 
@@ -90,11 +72,7 @@ def parse_args(argv=None):
     parser.add_argument("--outdir", type=Path, default=REPOSITORY / "results")
     return parser.parse_args(argv)
 
-
-# --------------------------------------------------------------------------
 # Sampling
-# --------------------------------------------------------------------------
-
 
 def tune_proposal(posterior, n_warmup, rng):
     pilot = MetropolisHastings(
@@ -103,12 +81,10 @@ def tune_proposal(posterior, n_warmup, rng):
     kept = pilot.samples[n_warmup // 4 :]
     return np.cov(kept.T), kept.mean(axis=0), pilot.acceptance_rate
 
-
 def calibrate_length(posterior, proposal, start, rng, target_r, probe_steps=6000):
     probe = MetropolisHastings(posterior, proposal).sample(start, probe_steps, rng)
     tau = float(np.max(integrated_time(probe.samples[probe_steps // 4 :])))
     return int(np.ceil(tau / target_r)), tau
-
 
 def dispersed_starts(posterior, centre, covariance, n_chains, rng, spread=3.0):
     factor = np.linalg.cholesky(covariance)
@@ -121,11 +97,7 @@ def dispersed_starts(posterior, centre, covariance, n_chains, rng, spread=3.0):
             return np.array(starts)
     raise RuntimeError("could not find enough valid starting points")
 
-
-# --------------------------------------------------------------------------
 # Reporting
-# --------------------------------------------------------------------------
-
 
 def summarize(samples, likelihood, say):
     flat = samples.reshape(-1, samples.shape[-1])
@@ -214,11 +186,7 @@ def report_convergence(samples, acceptance, target_r, say):
     say(f"Dunkley thresholds passed  : {spectra_pass}")
     return rhat_pass and spectra_pass
 
-
-# --------------------------------------------------------------------------
 # Figures
-# --------------------------------------------------------------------------
-
 
 def _style():
     plt.rcParams.update({
@@ -234,14 +202,11 @@ def _style():
         "font.size": 10,
     })
 
-
 DATA_COLOR = "0.55"
 FIT_COLOR = "C3"
 EDS_COLOR = "C2"
 
-
 def figure_hubble(samples, likelihood, redshift, mu, sigma):
-    """One message: the decelerating model fails, and the residuals show how."""
     flat = samples.reshape(-1, samples.shape[-1])
     best = flat.mean(axis=0)
     model, eds = FLRW(*best), FLRW(*EINSTEIN_DE_SITTER)
@@ -289,12 +254,10 @@ def figure_hubble(samples, likelihood, redshift, mu, sigma):
     figure.tight_layout()
     return figure
 
-
 def _credible_levels(histogram, probabilities=(0.683, 0.954)):
     ordered = np.sort(histogram.ravel())[::-1]
     enclosed = np.cumsum(ordered) / ordered.sum()
     return [ordered[np.searchsorted(enclosed, p)] for p in probabilities][::-1]
-
 
 def figure_contours(samples):
     flat = samples.reshape(-1, samples.shape[-1])
@@ -314,9 +277,6 @@ def figure_contours(samples):
         axis.set_axisbelow(True)
         for side in ("top", "right"):
             axis.spines[side].set_visible(False)
-
-    # No flat line here: unlabelled it means nothing, and labelling it would
-    # crowd the panel. It carries its legend in figure_parameter_space.
     figure.set_size_inches(6.4, 6.4)
     return figure
 
@@ -357,7 +317,6 @@ def figure_parameter_space(samples, likelihood):
 
 
 def figure_convergence(samples):
-    """Three questions, one row each, in words rather than symbols."""
     n_chains, n_steps, _ = samples.shape
     rho = autocorrelation(samples, max_lag=60)
     tau = integrated_time(samples)
@@ -378,8 +337,6 @@ def figure_convergence(samples):
         for chain in range(n_chains):
             cumulative = np.cumsum(samples[chain, :, index]) / np.arange(1, n_steps + 1)
             running.plot(cumulative, lw=0.9)
-        # mcse is for the POOLED mean; a single chain carries n_chains times
-        # fewer samples, so its own error bar is sqrt(n_chains) wider.
         single = mcse[index] * np.sqrt(n_chains)
         running.axhspan(final - single, final + single, color="0.6", alpha=0.4)
         running.set_xlim(0, n_steps)
@@ -387,29 +344,22 @@ def figure_convergence(samples):
         running.set_ylabel(f"mean of {label} so far", fontsize=11)
         running.set_xlabel("step")
         running.set_title("grey band: expected spread of one chain's mean")
-
         correlation.plot(rho[:, index], color="C0")
         correlation.axhline(0, color="k", lw=0.8)
         correlation.axvline(tau[index], color=FIT_COLOR, ls="--", lw=1.2)
         correlation.set_ylabel("correlation", fontsize=11)
         correlation.set_xlabel("separation between samples (steps)")
         correlation.set_title(f"independent after about {tau[index]:.0f} steps")
-
     figure.tight_layout()
     return figure
 
-
 def figure_dunkley(samples):
-    """One message: the power is flat at small j, then falls."""
     figure, axes = plt.subplots(1, 2, figsize=(9.5, 3.8))
     for index, label in enumerate(LABELS):
         chain = samples[0, :, index]
         modes, power = power_spectrum(chain)
         fit = fit_dunkley(chain)
         wavenumber = 2.0 * np.pi * modes / chain.size
-
-        # Coarse log bins: the raw periodogram scatters exponentially, and
-        # a bin holding one mode is just noise.
         edges = np.unique(np.geomspace(1, modes[-1], 22).astype(int))
         centres, means = [], []
         for low, high in zip(edges[:-1], edges[1:]):
@@ -417,7 +367,6 @@ def figure_dunkley(samples):
             if np.count_nonzero(inside) >= 2:
                 centres.append(np.sqrt(low * high))
                 means.append(power[inside].mean())
-
         axis = axes[index]
         axis.loglog(centres, means, "o", color="C0", ms=4)
         axis.loglog(modes, fit.p0 / (1 + (wavenumber / fit.k_star) ** fit.alpha),
@@ -430,14 +379,12 @@ def figure_dunkley(samples):
     figure.tight_layout()
     return figure
 
-
 def cross_check(likelihood, tuned_covariance, n_steps, rng, marginalized_flat, say):
     """Sample M as a third parameter and compare with the analytic result."""
     prior = UniformPrior([0.0, -1.0, 41.0], [2.0, 3.0, 45.0])
     posterior = Posterior(
         lambda theta: -0.5 * likelihood.chi2_at_offset(theta[:2], theta[2]), prior
     )
-
     start_covariance = np.zeros((3, 3))
     start_covariance[:2, :2] = tuned_covariance
     start_covariance[2, 2] = 0.004**2
@@ -453,7 +400,6 @@ def cross_check(likelihood, tuned_covariance, n_steps, rng, marginalized_flat, s
         rng,
     )
     flat = result.burned(n_steps // 10).flat()
-
     say("\n" + "-" * 74)
     say("CROSS-CHECK: M sampled instead of marginalized analytically")
     say("-" * 74)
@@ -469,10 +415,6 @@ def cross_check(likelihood, tuned_covariance, n_steps, rng, marginalized_flat, s
         f"{flat[:, 2].mean():9.4f} +- {flat[:, 2].std():.4f}")
     say("\nA sign error in B, or a swapped residual convention, would separate")
     say("these. Nothing else in the pipeline would notice.")
-
-
-# --------------------------------------------------------------------------
-
 
 def main(argv=None):
     args = parse_args(argv)

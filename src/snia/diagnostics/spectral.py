@@ -1,21 +1,13 @@
 """The Dunkley power-spectrum convergence test.
 
-A chain viewed in Fourier space separates two questions that a trace plot
-mixes together: whether the long-timescale modes have flattened into white
-noise (has the chain reached stationarity?) and how precisely the mean is
-known (is the run long enough?).
-
-Dunkley et al. (2005) fit the chain power with
+Dunkley fit the chain power with
 
     P(k) = P0 / (1 + (k/k_star)^alpha),      j_star = k_star N / (2 pi),
 
-and require j_star > 20 and r = P0/(N s^2) < 0.01. Those thresholds are
-paper-specific; a chain trapped in one mode can still look stationary and
-white, so this must be combined with dispersed chains.
+and require j_star > 20 and r = P0/(N s^2) < 0.01.
 """
 
 from dataclasses import dataclass
-
 import numpy as np
 from scipy.optimize import minimize
 
@@ -23,12 +15,7 @@ from scipy.optimize import minimize
 #: known to 10% of the posterior width (r = 0.01 means MCSE/s = 0.1).
 MIN_J_STAR = 20.0
 MAX_R = 0.01
-
-#: Range allowed for the high-frequency slope. A random walk gives alpha ~ 2,
-#: and alpha < 1 does not describe a turnover at all, so the lower bound is
-#: both physical and necessary: see the note in fit_dunkley.
 ALPHA_BOUNDS = (1.0, 8.0)
-
 
 @dataclass
 class DunkleySpectrum:
@@ -67,22 +54,10 @@ class DunkleySpectrum:
 
 def power_spectrum(chain):
     """Fourier modes of a centred chain.
-
         a_j = (1/sqrt(N)) sum_n (x_n - x_bar) exp(2 pi i j n / N),
         P_j = |a_j|^2,   k_j = 2 pi j / N.
-
     Returns ``(j, power)`` for j = 1 .. N//2, where small j probes the longest
-    timescales in the chain.
-
-    Subtracting the mean is belt and braces: sum_n exp(-2 pi i j n / N) = 0 for
-    every j != 0, so a constant offset only ever lands in the j = 0 mode, which
-    is dropped anyway. It is kept because it states the intent, and because
-    j = 0 would otherwise dwarf everything if this function ever returned it.
-
-    With this normalization the expected power is the spectral density, so
-    P(k -> 0) = s^2 tau_int. That is what ties this test to the effective
-    sample size: r = P0/(N s^2) = tau_int/N = 1/N_eff.
-    """
+    timescales in the chain."""
     x = np.asarray(chain, dtype=float).ravel()
     amplitude = np.fft.rfft(x - x.mean()) / np.sqrt(x.size)
     power = np.abs(amplitude) ** 2
@@ -90,21 +65,6 @@ def power_spectrum(chain):
 
 
 def fit_dunkley(chain, n_iterations=3):
-    """Fit the Dunkley model to one unthinned chain of one parameter.
-
-    The periodogram ordinates are asymptotically independent and exponentially
-    distributed about the true spectrum, so the fit maximizes
-
-        log L = -sum_j [ log P(k_j) + P_hat_j / P(k_j) ]
-
-    rather than least-squares on the raw power. Least squares would be wrong
-    twice over: the noise is multiplicative, not additive, and log P_hat is
-    biased low by the Euler-Mascheroni constant.
-
-    Only the low-k modes are fitted, since the model describes the turnover
-    and not whatever the spectrum does at high frequency. Following Dunkley,
-    the range is refined iteratively to about 10 j_star.
-    """
     x = np.asarray(chain, dtype=float).ravel()
     n_steps = x.size
     variance = x.var(ddof=1)
@@ -112,19 +72,6 @@ def fit_dunkley(chain, n_iterations=3):
     k = 2.0 * np.pi * j / n_steps
 
     n_modes = min(power.size, max(100, n_steps // 50))
-
-    # Two guards, both needed, and each of which was found by a fit that went
-    # wrong rather than anticipated:
-    #
-    #  * alpha is bounded below at 1. A shallow alpha opens a degenerate ridge
-    #    where k_star collapses towards zero and P0 grows to compensate, since
-    #    P0/(1 + (k/k_star)^alpha) -> P0 (k_star/k)^alpha is then a slowly
-    #    falling power law that mimics the data. It reports j_star = 0 and a
-    #    spurious failure. alpha < 1 does not describe a turnover anyway.
-    #
-    #  * each iteration restarts from a guess derived on its own mode window,
-    #    rather than warm-starting from the previous fit. Warm starting
-    #    inherits a degenerate state and cannot escape it.
     bounds = [
         (None, None),
         (np.log(k[0]) - 5.0, np.log(k[-1]) + 10.0),
@@ -175,12 +122,7 @@ def _negative_log_likelihood(log_params, k, power):
 
 
 def _initial_guess(k, power):
-    """Rough (log P0, log k_star, log alpha) to start the optimizer.
-
-    The plateau is estimated from the lowest modes and the turnover from where
-    the running mean first falls to half of it. alpha starts at 2, the slope a
-    random walk produces.
-    """
+    """Rough (log P0, log k_star, log alpha) to start the optimizer."""
     n_low = max(5, power.size // 200)
     p0 = max(power[:n_low].mean(), np.finfo(float).tiny)
 

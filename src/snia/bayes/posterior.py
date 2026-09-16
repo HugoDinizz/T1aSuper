@@ -1,21 +1,8 @@
-"""Combining a prior and a likelihood into one log density.
-
-Nothing here knows about cosmology or supernovae. The sampler must be
-exercisable against a target whose answer is known analytically, so every
-object in this package takes plain callables and plain arrays.
-"""
+"""Combining a prior and a likelihood into one log density."""
 
 import numpy as np
-
-
 class UniformPrior:
-    """Flat prior on a box, 0 inside and -inf outside.
-
-    The value inside is 0, not the normalized -sum(log(upper-lower)): only
-    ratios of the target enter Metropolis-Hastings, so an overall constant is
-    irrelevant. It would matter for evidence, which this exercise does not
-    compute.
-    """
+    """Flat prior on a box, 0 inside and -inf outside."""
 
     def __init__(self, lower, upper):
         self.lower = np.asarray(lower, dtype=float)
@@ -44,18 +31,8 @@ class UniformPrior:
     def __repr__(self):
         return f"UniformPrior(lower={self.lower.tolist()}, upper={self.upper.tolist()})"
 
-
 class Posterior:
-    """log posterior = log prior + log likelihood, up to a constant.
-
-    The prior is evaluated FIRST and the likelihood is skipped when the prior
-    is -inf. That is not a micro-optimization: the likelihood here integrates a
-    cosmology on a 2001-point grid, and a random-walk proposal spends a good
-    fraction of its attempts outside the box.
-
-    A non-finite likelihood is passed through as -inf rather than raised on, so
-    that the sampler sees a rejection instead of an exception.
-    """
+    """log posterior = log prior + log likelihood."""
 
     def __init__(self, log_likelihood, log_prior):
         if not callable(log_likelihood) or not callable(log_prior):

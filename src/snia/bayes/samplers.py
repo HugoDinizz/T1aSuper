@@ -1,26 +1,11 @@
-"""Metropolis-Hastings.
-
-The sampler takes any callable returning a log density, so it can be checked
-against a target whose moments are known in closed form. It never touches the
-global numpy random state: a generator is required, and the same generator
-seed reproduces a chain bit for bit.
-"""
+"""Metropolis-Hastings"""
 
 from dataclasses import dataclass
-
 import numpy as np
 
 
 @dataclass
 class MCMCResult:
-    """Output of a run.
-
-    ``samples`` is (n_steps, n_params) for a single chain and
-    (n_chains, n_steps, n_params) for a set of them; ``log_prob`` and
-    ``accepted`` carry the matching leading axes. The (n_chains, n_steps,
-    n_params) layout is what the diagnostics package expects.
-    """
-
     samples: np.ndarray
     log_prob: np.ndarray
     accepted: np.ndarray
@@ -53,8 +38,6 @@ class MCMCResult:
     def flat(self):
         """All chains stacked into one (n_chains*n_steps, n_params) array."""
         return self.samples.reshape(-1, self.n_params)
-
-
 class MetropolisHastings:
     """Random-walk Metropolis-Hastings with an explicit accept/reject step.
 
@@ -64,19 +47,6 @@ class MetropolisHastings:
         log alpha = log pi(theta') - log pi(theta)
                     + log q(theta | theta') - log q(theta' | theta)
         accept if log u < log alpha,  u ~ U(0,1)
-
-    Three details that are easy to get wrong and that the tests pin down:
-
-    * **A rejection is still a sample.** The current state is appended again.
-      Keeping only accepted proposals changes the target frequencies and biases
-      every estimate.
-    * **The current log density is cached.** After a rejection it is reused, so
-      each iteration costs exactly one target evaluation.
-    * **A non-finite target is a rejection, not an error.** -inf and NaN both
-      make the comparison false, so unphysical proposals are simply refused.
-
-    ``min(0, log alpha)`` is not applied because log u < 0 always, which makes
-    the clamp redundant.
     """
 
     def __init__(self, log_target, proposal):
@@ -89,7 +59,6 @@ class MetropolisHastings:
         self.proposal = proposal
 
     def sample(self, initial_state, n_steps, rng):
-        """Run one chain of n_steps iterations from initial_state."""
         if not isinstance(rng, np.random.Generator):
             raise TypeError(
                 "pass an explicit numpy.random.Generator, e.g. "
@@ -121,9 +90,6 @@ class MetropolisHastings:
             if not symmetric:
                 log_alpha += self.proposal.logpdf(state, candidate)
                 log_alpha -= self.proposal.logpdf(candidate, state)
-
-            # log(0) is -inf, which correctly always accepts; NaN compares
-            # false, which correctly always rejects.
             with np.errstate(divide="ignore"):
                 log_u = np.log(rng.random())
 
@@ -138,14 +104,7 @@ class MetropolisHastings:
 
 
 def run_chains(log_target, proposal, initial_states, n_steps, rng):
-    """Run one chain per initial state and stack them.
-
-    Each chain gets its own child generator via ``rng.spawn``, so the streams
-    are independent and the whole set is still reproducible from one seed.
-    Dispersed starting points are what make split-Rhat meaningful: agreement
-    between chains that began far apart is much stronger evidence than one
-    stable-looking trace.
-    """
+    """Run one chain per initial state and stack them."""
     initial_states = np.atleast_2d(np.asarray(initial_states, dtype=float))
     children = rng.spawn(initial_states.shape[0])
 

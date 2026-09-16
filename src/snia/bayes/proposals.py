@@ -1,13 +1,6 @@
-"""Proposal distributions.
-
-A proposal is an algorithmic choice, not part of the statistical model. It is
-represented by BOTH ``propose`` and ``logpdf`` so that one sampler handles
-symmetric and asymmetric moves alike; ``is_symmetric`` lets the sampler skip
-the Hastings ratio when it provably cancels.
-"""
+"""Proposal distributions for MH."""
 
 from abc import ABC, abstractmethod
-
 import numpy as np
 from scipy.linalg import cholesky, solve_triangular
 
@@ -35,12 +28,7 @@ class GaussianRandomWalk(Proposal):
     axis-aligned proposal wastes attempts across a narrow degeneracy, which is
     exactly the geometry of the supernova posterior, so ``cov`` should
     approximate the posterior covariance.
-
-    ``scale`` multiplies the whole step. Keeping it separate from ``cov`` lets
-    a pilot run fix the SHAPE once and then tune only the SIZE, which is the
-    one-dimensional part of the problem.
     """
-
     is_symmetric = True
 
     def __init__(self, cov, scale=1.0):
@@ -55,11 +43,7 @@ class GaussianRandomWalk(Proposal):
         self.cov = cov
         self.scale = float(scale)
         self.n_params = cov.shape[0]
-        # Factor once. A proposal covariance that is not positive definite is a
-        # programming error, not a parameter point, so this is allowed to raise.
         self.cholesky = cholesky(cov, lower=True)
-
-        # log q needs -0.5 log det(2 pi scale^2 cov), constant across calls.
         log_det_cov = 2.0 * np.sum(np.log(np.diag(self.cholesky)))
         self._log_norm = -0.5 * (
             self.n_params * np.log(2.0 * np.pi)

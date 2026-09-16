@@ -86,7 +86,6 @@ src/snia/
 ├── diagnostics/        autocorrelation, split R-hat, Dunkley spectrum
 └── data/               Union2.1 loader and likelihood
 
-tests/                  acceptance tests
 scripts/                reproducible pipeline
 notebooks/              narrative and figures
 results/                script output (tracked but empty; run it yourself)
@@ -94,9 +93,7 @@ results/                script output (tracked but empty; run it yourself)
 
 ## The notebooks
 
-`notebooks/` is the intended way in. Each one builds on the last, and all are
-stored **already executed**, with outputs and figures, so they can be read
-without running anything.
+`notebooks/` is the intended way in. Each one builds on the last, and all are stored already executed, with outputs and figures, so they can be read without running anything. They also double as validation tests: each notebook exercises the corresponding part of the package.
 
 |   | Notebook                                                                    | Description                                                                                                                                                              |
 | - | --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
