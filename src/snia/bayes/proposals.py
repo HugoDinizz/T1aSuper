@@ -22,12 +22,6 @@ class Proposal(ABC):
 
 class GaussianRandomWalk(Proposal):
     """theta' = theta + scale * L z, with z ~ N(0, I) and L L^T = cov.
-
-    Centred on the current state, so q(a|b) depends only on a - b and the
-    proposal is symmetric. The covariance is what steers exploration: an
-    axis-aligned proposal wastes attempts across a narrow degeneracy, which is
-    exactly the geometry of the supernova posterior, so ``cov`` should
-    approximate the posterior covariance.
     """
     is_symmetric = True
 
@@ -43,7 +37,9 @@ class GaussianRandomWalk(Proposal):
         self.cov = cov
         self.scale = float(scale)
         self.n_params = cov.shape[0]
-        self.cholesky = cholesky(cov, lower=True)
+        # np.tril: SciPy 1.18.1 can leave garbage above the diagonal for n >= 64,
+        # and propose() multiplies by the full matrix.
+        self.cholesky = np.tril(cholesky(cov, lower=True))
         log_det_cov = 2.0 * np.sum(np.log(np.diag(self.cholesky)))
         self._log_norm = -0.5 * (
             self.n_params * np.log(2.0 * np.pi)

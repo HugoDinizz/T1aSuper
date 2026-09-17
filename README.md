@@ -17,12 +17,16 @@ Clone the repository and create a local virtual environment:
 git clone https://github.com/HugoDinizz/T1aSuper.git
 cd T1aSuper
 
+python3 --version        # must be 3.11 or newer
 python3 -m venv .venv
 source .venv/bin/activate
 
 python -m pip install --upgrade pip
-python -m pip install -e .
+python -m pip install -e ".[dev]"
 ```
+
+If `python3 --version` reports something older (macOS ships Python 3.9), create
+the environment with a newer interpreter explicitly, e.g. `python3.12 -m venv .venv`.
 
 Using `python -m pip` ensures that `pip` is invoked through the Python interpreter of the active virtual environment. This avoids ambiguity when multiple Python installations are present on the system, such as system Python, Conda, or Homebrew Python.
 
@@ -31,12 +35,11 @@ On Windows, activate the environment with:
 .venv\Scripts\activate
 ```
 
-The `pip install -e .` step installs the package and its runtime dependencies and links `src/snia/` to the Python interpreter of the virtual environment.
+The `pip install -e ".[dev]"` step installs the package with its runtime dependencies, plus Jupyter (needed for the notebooks) and pytest, and links `src/snia/` to the Python interpreter of the virtual environment. The quotes matter: without them, zsh treats the brackets as a file pattern.
 
 Verify the installation with:
 ```bash
 python -c "import snia; print(snia.__file__)"
-python -m pytest
 ```
 
 The import should resolve to a path under `src/snia/`.
@@ -47,7 +50,7 @@ A Conda environment is also provided for users who prefer Conda:
 ```bash
 conda env create -f environment.yml
 conda activate t1asuper
-python -m pip install -e .
+python -m pip install -e ".[dev]"
 ```
 
 The `environment.yml` reproduces the Conda environment used for the project, while the `pyproject.toml` defines the Python package and its dependencies.
@@ -114,7 +117,7 @@ jupyter lab notebooks/
 python scripts/run_union21.py --cross-check
 ```
 
-writes `summary.txt`, `chains.npz` and four figures to `results/`, and exits
+writes `summary.txt`, `chains.npz` and five figures to `results/`, and exits
 non-zero if the convergence diagnostics fail, so it can be used as a check and
 not only as a report. `results/` is tracked but empty: run the script to
 produce your own.
@@ -138,7 +141,7 @@ $$
 Because the logarithm turns the product into a sum, we have:
 
 $$
-5\log_{10}\left(\frac{D_L}{\rm Mpc}\right) + 25 = \underbrace{5\log_{10} d_L(z;\Omega_m,\Omega_\Lambda)}_{\text{shape}} - \underbrace{5\log_{10}\frac{c/H_0}{\rm Mpc} + 25}_{\text{constant in }z}.
+5\log_{10}\left(\frac{D_L}{\rm Mpc}\right) + 25 = \underbrace{5\log_{10} d_L(z;\Omega_m,\Omega_\Lambda)}_{\text{shape}} + \underbrace{5\log_{10}\frac{c/H_0}{\rm Mpc} + 25}_{\text{constant in }z}.
 $$
 
 Only the first term depends on the parameters we are fitting, $\mu_{\rm shape}(z;\Omega_m,\Omega_\Lambda) \equiv 5\log_{10} d_L$.

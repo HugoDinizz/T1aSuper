@@ -23,7 +23,8 @@ class Union21Likelihood:
         self.mu = mu
         self.n_sn = n
         self.z_max = float(z.max())
-        self.L = cholesky(cov, lower=True)
+        # np.tril: SciPy 1.18.1 can leave garbage above the diagonal for n >= 64.
+        self.L = np.tril(cholesky(cov, lower=True))
         self.v = cho_solve((self.L, True), np.ones(n))
         self.E = float(self.v.sum())
 
@@ -63,8 +64,5 @@ class Union21Likelihood:
         if not model.is_valid(self.z_max):
             return None
         delta = self.mu - 5.0 * np.log10(model.luminosity_distance(self.z))
-        # The single per-call triangular solve. check_finite is off because
-        # is_valid has already guaranteed d_L > 0 and finite on [0, z_max],
-        # and mu comes from the validated loader.
         y = solve_triangular(self.L, delta, lower=True, check_finite=False)
         return float(y @ y), float(self.v @ delta)
