@@ -400,21 +400,42 @@ def cross_check(likelihood, tuned_covariance, n_steps, rng, marginalized_flat, s
         rng,
     )
     flat = result.burned(n_steps // 10).flat()
+
+    # Same (Om, OL) chain, but with M held at its best-fit value instead.
+    m_hat = likelihood.m_offset(marginalized_flat.mean(axis=0))
+    fixed_posterior = Posterior(
+        lambda theta: -0.5 * likelihood.chi2_at_offset(theta, m_hat),
+        UniformPrior(PRIOR_LOWER, PRIOR_UPPER),
+    )
+    fixed = run_chains(
+        fixed_posterior,
+        GaussianRandomWalk(tuned_covariance, scale=OPTIMAL_SCALE),
+        pilot.samples[-4:, :2],
+        n_steps,
+        rng,
+    ).burned(n_steps // 10).flat()
+
+    columns = [("analytic", marginalized_flat), ("M sampled", flat),
+               (f"M fixed = {m_hat:.3f}", fixed)]
     say("\n" + "-" * 74)
-    say("CROSS-CHECK: M sampled instead of marginalized analytically")
+    say("CROSS-CHECK: three ways of treating M")
     say("-" * 74)
-    say(f"{'parameter':14s} {'analytic':>21s} {'M sampled':>21s} {'agreement':>13s}")
+    say(f"{'parameter':14s}" + "".join(f"{title:>21s}" for title, _ in columns))
+    for index, name in enumerate(NAMES):
+        say(f"{name:14s}" + "".join(
+            f"{chain[:, index].mean():10.4f} +- {chain[:, index].std():.4f}"
+            for _, chain in columns))
+    say(f"{'M':14s}{'(integrated out)':>21s}"
+        f"{flat[:, 2].mean():10.4f} +- {flat[:, 2].std():.4f}{'(fixed)':>21s}")
+
+    say("\nanalytic vs M sampled: the same marginal posterior, computed two ways.")
     for index, name in enumerate(NAMES):
         analytic, sampled = marginalized_flat[:, index], flat[:, index]
-        error = np.hypot(monte_carlo_error(analytic)[0],
-                         monte_carlo_error(sampled)[0])
-        say(f"{name:14s} {analytic.mean():9.4f} +- {analytic.std():.4f} "
-            f"{sampled.mean():9.4f} +- {sampled.std():.4f} "
-            f"{abs(analytic.mean() - sampled.mean()) / error:8.2f} MCSE")
-    say(f"{'M':14s} {'(marginalized out)':>21s} "
-        f"{flat[:, 2].mean():9.4f} +- {flat[:, 2].std():.4f}")
-    say("\nA sign error in B, or a swapped residual convention, would separate")
-    say("these. Nothing else in the pipeline would notice.")
+        mcse = np.hypot(monte_carlo_error(analytic)[0], monte_carlo_error(sampled)[0])
+        say(f"  {name:14s} means differ by "
+            f"{abs(analytic.mean() - sampled.mean()) / mcse:.2f} MCSE, "
+            f"sd by {abs(analytic.std() - sampled.std()) / (mcse / np.sqrt(2)):.2f} "
+            f"MC errors")
 
 def main(argv=None):
     args = parse_args(argv)
